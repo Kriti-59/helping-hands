@@ -1,0 +1,12 @@
+.App {
+  text-align: center;
+  padding: 2rem;
+}
+
+.api-status {
+  margin-top: 2rem;
+  padding: 1rem;
+  background-color: #f3f4f6;
+  border-radius: 8px;
+  font-family: monospace;
+}
