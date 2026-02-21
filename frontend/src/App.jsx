@@ -1,31 +1,68 @@
-import { useState, useEffect } from 'react';
-import { testConnection } from './services/api';
-import './App.css';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { AuthProvider, useAuth } from './context/AuthContext'
 
-function App() {
-  const [apiStatus, setApiStatus] = useState('checking...');
+// Pages
+import Landing from './pages/LandingPage'
+import UserLogin from './pages/auth/UserLogin'
+import UserRegister from './pages/auth/UserRegister'
+import VolunteerLogin from './pages/auth/VolunteerLogin'
+import VolunteerRegister from './pages/auth/VolunteerRegister'
+import UserDashboard from './pages/user/UserDashboard'
+import VolunteerDashboard from './pages/volunteer/VolunteerDashboard'
 
-  useEffect(() => {
-    // Test backend connection on load
-    const checkAPI = async () => {
-      try {
-        const response = await testConnection();
-        setApiStatus(`✓ Connected: ${response.status}`);
-      } catch (error) {
-        setApiStatus('✗ Backend not connected');
-      }
-    };
-    
-    checkAPI();
-  }, []);
-
-  return (
-    <div className="App">
-      <div className="api-status">
-        Backend Status: {apiStatus}
-      </div>
-    </div>
-  );
+// Protected route component
+function ProtectedRoute({ children, allowedTypes }) {
+  const { isAuthenticated, user } = useAuth()
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />
+  }
+  
+  if (allowedTypes && !allowedTypes.includes(user?.user_type)) {
+    return <Navigate to="/" replace />
+  }
+  
+  return children
 }
 
-export default App;
+function AppRoutes() {
+  return (
+    <Routes>
+      {/* Public routes */}
+      <Route path="/" element={<Landing />} />
+      <Route path="/login" element={<UserLogin />} />
+      <Route path="/register" element={<UserRegister />} />
+      <Route path="/volunteer/login" element={<VolunteerLogin />} />
+      <Route path="/volunteer/register" element={<VolunteerRegister />} />
+
+      {/* Protected user routes */}
+      <Route path="/dashboard" element={
+        <ProtectedRoute allowedTypes={['user']}>
+          <UserDashboard />
+        </ProtectedRoute>
+      } />
+
+      {/* Protected volunteer routes */}
+      <Route path="/volunteer/dashboard" element={
+        <ProtectedRoute allowedTypes={['volunteer', 'organization']}>
+          <VolunteerDashboard />
+        </ProtectedRoute>
+      } />
+
+      {/* Catch all */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  )
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <AppRoutes />
+      </Router>
+    </AuthProvider>
+  )
+}
+
+export default App
