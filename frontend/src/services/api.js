@@ -1,57 +1,96 @@
-import axios from 'axios'
+import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-// Create axios instance
 const api = axios.create({
   baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-})
+  headers: { "Content-Type": "application/json" },
+});
 
-// Request interceptor - add token to headers
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
-    return config
-  },
-  (error) => Promise.reject(error)
-)
+// Add token to requests
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
 
-// Response interceptor - handle errors
+// Handle 401 errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Clear auth and redirect to login
-      localStorage.clear()
-      window.location.href = '/login'
+      localStorage.clear();
+      window.location.href = "/";
     }
-    return Promise.reject(error)
-  }
-)
+    return Promise.reject(error);
+  },
+);
 
 // ============================================
 // AUTH ENDPOINTS
 // ============================================
 
 export const authAPI = {
-  // User registration
-  registerUser: (data) => api.post('/api/auth/register', data),
-  
-  // Volunteer registration
-  registerVolunteer: (data) => api.post('/api/auth/register/volunteer', data),
-  
-  // Universal login
-  login: (data) => api.post('/api/auth/login', data),
-  
-  // Logout
-  logout: () => api.post('/api/auth/logout'),
-}
+  registerUser: (data) => api.post("/api/auth/register", data),
+  registerVolunteer: (data) => api.post("/api/auth/register/volunteer", data),
+  login: (data) => api.post("/api/auth/login", data),
+  logout: () => api.post("/api/auth/logout"),
+};
 
+// ============================================
+// USER ENDPOINTS
+// ============================================
 
-export default api  
+export const userAPI = {
+  getProfile: (userId) => api.get(`/api/users/${userId}`),
+  updateProfile: (userId, data) => api.patch(`/api/users/${userId}`, data),
+  getRequests: (userId) => api.get(`/api/users/${userId}/requests`),
+};
+
+// ============================================
+// REQUEST ENDPOINTS
+// ============================================
+
+export const requestAPI = {
+  create: (data, userId) => api.post(`/api/requests/?user_id=${userId}`, data),
+  getAll: (filters = {}) => api.get("/api/requests/", { params: filters }),
+  getById: (requestId, helperId = null) => {
+    const params = helperId ? { helper_id: helperId } : {};
+    return api.get(`/api/requests/${requestId}`, { params });
+  },
+  updateStatus: (requestId, status) =>
+    api.patch(`/api/requests/${requestId}/status`, null, {
+      params: { new_status: status },
+    }),
+};
+
+// ============================================
+// VOLUNTEER ENDPOINTS
+// ============================================
+
+export const volunteerAPI = {
+  getAll: (filters = {}) => api.get("/api/volunteers/", { params: filters }),
+  getById: (id) => api.get(`/api/volunteers/${id}`),
+  getMatches: (id) => api.get(`/api/volunteers/${id}/matches`),
+};
+
+// ============================================
+// ORGANIZATION ENDPOINTS
+// ============================================
+
+export const organizationAPI = {
+  getAll: (filters = {}) => api.get("/api/organizations/", { params: filters }),
+  getById: (id) => api.get(`/api/organizations/${id}`),
+  getMatches: (id) => api.get(`/api/organizations/${id}/matches`),
+};
+
+// ============================================
+// MATCH ENDPOINTS
+// ============================================
+
+export const matchAPI = {
+  accept: (matchId) => api.post(`/api/matches/${matchId}/accept`),
+  decline: (matchId) => api.post(`/api/matches/${matchId}/decline`),
+};
+
+export default api;
