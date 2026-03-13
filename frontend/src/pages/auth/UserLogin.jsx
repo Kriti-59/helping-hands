@@ -63,9 +63,11 @@ export default function UserLogin() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <Link to="/" className="flex items-center justify-center gap-2 mb-6">
           <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-lg">H</span>
+            <span className="text-white font-bold text-lg">HH</span>
           </div>
-          <span className="text-2xl font-bold text-slate-800">HelpHub</span>
+          <span className="text-2xl font-bold text-slate-800">
+            Helping Hands
+          </span>
         </Link>
         <h2 className="text-center text-3xl font-bold text-slate-900">
           Sign In
@@ -98,7 +100,6 @@ export default function UserLogin() {
                 value={formData.email}
                 onChange={handleChange}
                 className="input-field"
-                placeholder="you@example.com"
                 autoComplete="email"
               />
             </div>
@@ -116,7 +117,6 @@ export default function UserLogin() {
                 value={formData.password}
                 onChange={handleChange}
                 className="input-field"
-                placeholder="Enter your password"
                 autoComplete="current-password"
               />
             </div>
