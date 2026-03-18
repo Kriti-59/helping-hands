@@ -804,9 +804,9 @@ body {
      FOOTER
   ───────────────────────────────────────── */
   .footer {
-    @apply py-5;
+    @apply py-2;
     background-color: #2a2418;
-    color: #a89880;
+    color: #e8e7e6;
   }
 
   .footer-inner {
@@ -814,19 +814,8 @@ body {
            flex flex-col md:flex-row justify-between items-center gap-3;
   }
 
-  .footer-links {
-    @apply flex gap-6;
-  }
-
-  .footer-link {
-    @apply text-xs font-medium transition-colors duration-150;
-    color: #a89880;
-  }
-
-  .footer-link:hover { color: #ffffff; }
-
   .footer-copy {
     @apply text-xs;
-    color: #6a5a48;
+    color: #f0f0f0;
   }
 }
