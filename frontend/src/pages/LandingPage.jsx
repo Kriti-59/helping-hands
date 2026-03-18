@@ -14,7 +14,7 @@ export default function Landing() {
       title: "Grocery delivery",
       meta: "Matched • 2 volunteers nearby",
       badge: "Active",
-      badgeClass: "Carousel-card-badge",
+      badgeClass: "carousel-card-badge",
     },
     {
       img: "/assets/dog-walking.png",
@@ -42,11 +42,11 @@ export default function Landing() {
     },
   ];
 
-  // Auto-rotate every 3 seconds
+  // Auto-rotate every 3.5 seconds
   useEffect(() => {
     const timer = setInterval(() => {
       setActiveCard((prev) => (prev + 1) % cards.length);
-    }, 3000);
+    }, 3500);
     return () => clearInterval(timer);
   }, []);
 
@@ -71,17 +71,25 @@ export default function Landing() {
 
             {/* Nav links */}
             <div className="navbar-actions">
+              
               <button
-                onClick={() => navigate("/login")}
+                onClick={() => navigate("/HowitWorks")}
                 className="btn-ghost"
               >
-                Sign In
+                How it Works
+              </button>
+              
+              <button
+                onClick={() => navigate("/login")}
+                className="btn-primary"
+              >
+                Log In
               </button>
               <button
                 onClick={() => navigate("/register")}
                 className="btn-primary"
               >
-                Get Started
+                Sign Up
               </button>
             </div>
         </div>
@@ -305,28 +313,7 @@ export default function Landing() {
 
       {/* Footer */}
       <footer className="footer">
-        <div className="footer-inner">
-          <div className="footer-links">
-              <button
-                onClick={() => navigate("/login")}
-                className="footer-link"
-              >
-                Sign In
-              </button>
-              <button
-                onClick={() => navigate("/register")}
-                className="footer-link"
-              >
-                Get Help
-              </button>
-              <button
-                onClick={() => navigate("/volunteer/register")}
-                className="footer-link"
-              >
-                Volunteer
-              </button>
-            </div>
-
+        <div className="footer-inner" style={{ justifyContent: "flex-end" }}>
             {/* Copyright */}
             <p className="footer-copy">
               © 2026 Helping Hands. Built for the community.
