@@ -58,35 +58,33 @@ export default function UserLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="auth-page">
       {/* Header */}
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <Link to="/" className="flex items-center justify-center gap-2 mb-6">
-          <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-lg">HH</span>
+      <div className="auth-col">
+        <Link to="/" className="auth-logo">
+          <div className="auth-logo-icon">
+            <span>HH</span>
           </div>
-          <span className="text-2xl font-bold text-slate-800">
+          <span className="auth-logo-text">
             Helping Hands
           </span>
         </Link>
-        <h2 className="text-center text-3xl font-bold text-slate-900">
+        <h2 className="auth-heading">
           Sign In
         </h2>
-        <p className="mt-2 text-center text-sm text-slate-500">
+        <p className="auth-subheading">
           Users, Volunteers, and Organizations
         </p>
-      </div>
 
       {/* Form */}
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-sm sm:rounded-lg sm:px-10 border border-gray-100">
+        <div className="auth-card">
           {error && (
-            <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+            <div className="auth-error">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="auth-form">
             {/* Email */}
             <div>
               <label htmlFor="email" className="input-label">
@@ -122,39 +120,32 @@ export default function UserLogin() {
             </div>
 
             {/* Submit */}
-            <div>
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full btn-primary"
+                className="btn-primary w-full"
               >
                 {loading ? "Signing in..." : "Sign In"}
               </button>
-            </div>
           </form>
 
           {/* Divider */}
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-slate-500">New user?</span>
-              </div>
+          <div className="auth-divider mt-6">
+            <div className="auth-divider-line">
+              <div className="w-full border-t border-stone-200"/>
             </div>
-
-            <div className="mt-6">
-              <Link
-                to="/register"
-                className="w-full btn-outline block text-center"
-              >
-                Create Account
-              </Link>
+            <div className="auth-divider-text">
+              <span className="auth-divider-label">New user?</span>
             </div>
           </div>
+
+          <div className="mt-4">
+          <Link to="/register" className="btn-outline w-full block text-center">
+            Create Account
+          </Link>
         </div>
       </div>
     </div>
+   </div> 
   );
 }
