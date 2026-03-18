@@ -1,10 +1,18 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+html {
+  overflow: hidden;
+  height: 100%;
+}
 
+body {
+  height: 100%;
+  overflow: auto;
+}
 
 /* ─────────────────────────────────────────
    BASE
@@ -29,112 +37,146 @@
      BUTTONS
   ───────────────────────────────────────── */
   .btn-primary {
-    @apply bg-amber-600 text-white px-5 py-2 rounded-full font-semibold text-sm
-           hover:bg-amber-500 active:scale-95
-           transition-all duration-150
-           focus:outline-none focus:ring-4 focus:ring-amber-300 focus:ring-offset-2
+    @apply text-white px-5 py-2 rounded-full font-semibold text-sm
+           active:scale-95 transition-all duration-150
+           focus:outline-none focus:ring-4 focus:ring-offset-2
            disabled:opacity-40 disabled:cursor-not-allowed;
+    background-color: #3a3228;
     font-family: 'Inter', sans-serif;
   }
+
+  .btn-primary:hover { background-color: #2a2418; }
 
   .btn-secondary {
-    @apply bg-teal-700 text-white px-5 py-2 rounded-xl font-semibold text-sm
-           hover:bg-teal-800 active:scale-95
-           transition-all duration-150
-           focus:outline-none focus:ring-4 focus:ring-teal-300 focus:ring-offset-2
+    @apply text-white px-5 py-2 rounded-xl font-semibold text-sm
+           active:scale-95 transition-all duration-150
+           focus:outline-none focus:ring-4 focus:ring-offset-2
            disabled:opacity-40 disabled:cursor-not-allowed;
+    background-color: #4a6a7a;
     font-family: 'Inter', sans-serif;
   }
 
+  .btn-secondary:hover { background-color: #3a5a6a; }
+
   .btn-outline {
-    @apply w-full border-2 border-amber-700 text-amber-700 px-5 py-2 rounded-xl font-semibold text-sm
-           hover:bg-amber-50 active:scale-95
-           transition-all duration-150
-           focus:outline-none focus:ring-4 focus:ring-amber-300 focus:ring-offset-2;
+    @apply w-full border-2 px-5 py-2 rounded-xl font-semibold text-sm
+           active:scale-95 transition-all duration-150
+           focus:outline-none focus:ring-4 focus:ring-offset-2;
+    border-color: #3a3228;
+    color: #3a3228;
     font-family: 'Inter', sans-serif;
   }
+
+  .btn-outline:hover { background-color: #f5f0e8; }
 
   .btn-ghost {
     @apply px-4 py-2 rounded-full font-semibold text-sm
-           text-stone-700 hover:bg-stone-200
            active:scale-95 transition-all duration-150;
+    color: #3a3228;
     font-family: 'Inter', sans-serif;
   }
 
+  .btn-ghost:hover { background-color: #e8e0d4; }
+
   .btn-danger {
     @apply bg-red-600 text-white px-5 py-2 rounded-xl font-semibold text-sm
-           hover:bg-red-700 active:scale-95
-           transition-all duration-150
+           hover:bg-red-700 active:scale-95 transition-all duration-150
            focus:outline-none focus:ring-4 focus:ring-red-300 focus:ring-offset-2
            disabled:opacity-40 disabled:cursor-not-allowed;
     font-family: 'Inter', sans-serif;
   }
 
   .btn-hero-primary {
-    @apply bg-amber-600 text-white px-6 py-3 rounded-xl font-semibold text-base
-           hover:bg-amber-700 active:scale-95
-           transition-all duration-150;
+    @apply text-white px-6 py-3 rounded-full font-semibold text-base
+           active:scale-95 transition-all duration-150;
+    background-color: #3a3228;
     font-family: 'Inter', sans-serif;
   }
 
+  .btn-hero-primary:hover { background-color: #2a2418; }
+
   .btn-hero-outline {
-    @apply border-2 border-white text-white px-6 py-3 rounded-xl font-semibold text-base
-           hover:bg-white hover:text-stone-900 active:scale-95
-           transition-all duration-150;
+    @apply border-2 px-6 py-3 rounded-full font-semibold text-base
+           active:scale-95 transition-all duration-150;
+    border-color: #4a6a7a;
+    color: #4a6a7a;
     font-family: 'Inter', sans-serif;
   }
+
+  .btn-hero-outline:hover { background-color: rgba(74, 106, 122, 0.1); }
 
   /* ─────────────────────────────────────────
      FORM ELEMENTS
   ───────────────────────────────────────── */
   .input-field {
     @apply w-full px-4 py-3 text-sm
-           border-2 border-stone-300 rounded-xl bg-white text-slate-900
+           border-2 rounded-xl bg-white text-slate-900
            placeholder-stone-400
-           focus:outline-none focus:border-amber-600 focus:ring-4 focus:ring-amber-100
+           focus:outline-none focus:ring-4
            transition-all duration-150;
+    border-color: #c8b8a0;
     font-family: 'Inter', sans-serif;
   }
 
+  .input-field:focus {
+    border-color: #3a3228;
+    --tw-ring-color: rgba(58, 50, 40, 0.12);
+  }
+
   .input-label {
-    @apply block text-sm font-semibold text-stone-700 mb-1.5;
+    @apply block text-sm font-semibold mb-1.5;
+    color: #3a3228;
     font-family: 'Inter', sans-serif;
   }
 
   .input-error {
-    @apply text-red-600 text-sm mt-1.5 font-medium;
+    @apply text-red-600 text-xs mt-1.5 font-medium;
   }
 
   .input-hint {
-    @apply text-xs text-stone-500 mt-1;
+    @apply text-xs mt-1;
+    color: #6a6258;
   }
 
   /* ─────────────────────────────────────────
      CARDS
   ───────────────────────────────────────── */
   .card {
-    @apply bg-white rounded-2xl border border-stone-200 p-6;
+    @apply bg-white rounded-2xl p-6;
+    border: 1px solid #d8c8b0;
   }
 
   .card-hover {
-    @apply bg-white rounded-2xl border border-stone-200 p-6
-           hover:border-amber-300 hover:shadow-md hover:-translate-y-1
+    @apply bg-white rounded-2xl p-6
+           hover:shadow-md hover:-translate-y-1
            transition-all duration-200 cursor-pointer;
+    border: 1px solid #d8c8b0;
   }
+
+  .card-hover:hover { border-color: #3a3228; }
 
   /* ─────────────────────────────────────────
      BADGES
   ───────────────────────────────────────── */
   .badge-pending {
-    @apply bg-amber-100 text-amber-800 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-amber-200;
+    @apply text-xs font-semibold px-2.5 py-0.5 rounded-full border;
+    background-color: #f0e8d8;
+    color: #5a4a38;
+    border-color: #d8c8b0;
   }
 
   .badge-matched {
-    @apply bg-teal-100 text-teal-800 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-teal-200;
+    @apply text-xs font-semibold px-2.5 py-0.5 rounded-full border;
+    background-color: #dce8f0;
+    color: #3a5a6a;
+    border-color: #b0c8d8;
   }
 
   .badge-completed {
-    @apply bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-green-200;
+    @apply text-xs font-semibold px-2.5 py-0.5 rounded-full border;
+    background-color: #e8e4dc;
+    color: #3a3228;
+    border-color: #c8b8a0;
   }
 
   .badge-cancelled {
@@ -150,11 +192,17 @@
   }
 
   .badge-medium {
-    @apply bg-amber-100 text-amber-800 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-amber-200;
+    @apply text-xs font-semibold px-2.5 py-0.5 rounded-full border;
+    background-color: #f0e8d8;
+    color: #5a4a38;
+    border-color: #d8c8b0;
   }
 
   .badge-low {
-    @apply bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-green-200;
+    @apply text-xs font-semibold px-2.5 py-0.5 rounded-full border;
+    background-color: #dce8f0;
+    color: #3a5a6a;
+    border-color: #b0c8d8;
   }
 
   /* ─────────────────────────────────────────
@@ -173,7 +221,7 @@
   ───────────────────────────────────────── */
   .auth-page {
     @apply min-h-screen flex flex-col justify-center py-16 px-6;
-    background-color: #f5f0eb;
+    background: linear-gradient(135deg, #f0ece4 0%, #e0d8cc 50%, #d8e0e8 100%);
   }
 
   .auth-col {
@@ -181,7 +229,8 @@
   }
 
   .auth-card {
-    @apply bg-white border border-stone-200 rounded-2xl px-8 py-8;
+    @apply bg-white rounded-2xl px-8 py-8;
+    border: 1px solid #d8c8b0;
   }
 
   .auth-logo {
@@ -189,21 +238,25 @@
   }
 
   .auth-logo-icon {
-    @apply w-10 h-10 bg-amber-700 rounded-xl flex items-center justify-center;
+    @apply w-10 h-10 rounded-xl flex items-center justify-center;
+    background-color: #3a3228;
   }
 
   .auth-logo-text {
-    @apply text-2xl text-stone-900;
+    @apply text-2xl;
+    color: #3a3228;
     font-family: 'DM Serif Display', serif;
   }
 
   .auth-heading {
-    @apply text-center text-3xl text-stone-900 mb-2;
+    @apply text-center text-3xl mb-2;
     font-family: 'DM Serif Display', serif;
+    color: #3a3228;
   }
 
   .auth-subheading {
-    @apply text-center text-sm text-stone-500 mb-0;
+    @apply text-center text-sm mb-0;
+    color: #6a6258;
     font-family: 'Inter', sans-serif;
   }
 
@@ -217,15 +270,19 @@
   }
 
   .auth-demo-box {
-    @apply mt-6 p-3 bg-amber-50 border border-amber-200 rounded-xl;
+    @apply mt-6 p-3 rounded-xl border;
+    background-color: #f0ece4;
+    border-color: #d8c8b0;
   }
 
   .auth-demo-title {
-    @apply text-xs font-semibold text-amber-900 mb-1;
+    @apply text-xs font-semibold mb-1;
+    color: #3a3228;
   }
 
   .auth-demo-text {
-    @apply text-xs text-amber-800 leading-relaxed;
+    @apply text-xs leading-relaxed;
+    color: #5a4a38;
   }
 
   .auth-divider {
@@ -241,30 +298,35 @@
   }
 
   .auth-divider-label {
-    @apply px-4 bg-white text-sm text-stone-400;
+    @apply px-4 bg-white text-sm;
+    color: #8a7a68;
   }
 
   .auth-secondary-link {
-    @apply text-sm text-stone-500 text-center mt-5;
+    @apply text-sm text-center mt-5;
+    color: #6a6258;
   }
 
   .auth-link {
-    @apply text-amber-700 hover:text-amber-800 font-semibold underline underline-offset-2;
+    @apply font-semibold underline underline-offset-2;
+    color: #4a6a7a;
   }
 
+  .auth-link:hover { color: #3a5a6a; }
+
   /* ─────────────────────────────────────────
-     NAVBAR — solid beige
+     NAVBAR
   ───────────────────────────────────────── */
   .navbar {
-    @apply top-0 left-0 right-0 z-50 border-b border-stone-200;
-    background-color: transparent;
+    @apply top-0 left-0 right-0 z-50 bg-white;
     position: relative;
+    border-bottom: 1px solid #d8c8b0;
   }
 
   .navbar-inner {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8
            flex justify-between items-center;
-    height: 54px;
+    height: 64px;
   }
 
   .navbar-logo {
@@ -272,11 +334,13 @@
   }
 
   .navbar-logo-icon {
-    @apply w-8 h-8 bg-amber-600 rounded-lg flex items-center justify-center;
+    @apply w-8 h-8 rounded-lg flex items-center justify-center;
+    background-color: #3a3228;
   }
 
   .navbar-logo-text {
-    @apply text-2xl text-stone-900;
+    @apply text-xl;
+    color: #3a3228;
     font-family: 'DM Serif Display', serif;
     letter-spacing: -0.02em;
   }
@@ -286,19 +350,21 @@
   }
 
   .navbar-greeting {
-    @apply text-sm font-medium text-stone-600;
+    @apply text-sm font-medium;
+    color: #5a4a38;
   }
 
   /* ─────────────────────────────────────────
-     DASHBOARD — solid navbar
+     DASHBOARD
   ───────────────────────────────────────── */
   .dashboard-page {
     @apply min-h-screen;
-    background-color: #f5f0eb;
+    background: linear-gradient(135deg, #f0ece4 0%, #e0d8cc 100%);
   }
 
   .dashboard-navbar {
-    @apply bg-white border-b border-stone-200 shadow-sm;
+    @apply bg-white shadow-sm;
+    border-bottom: 1px solid #d8c8b0;
   }
 
   .dashboard-content {
@@ -306,21 +372,25 @@
   }
 
   .dashboard-heading {
-    @apply text-3xl text-stone-900 mb-1;
+    @apply text-3xl mb-1;
     font-family: 'DM Serif Display', serif;
+    color: #3a3228;
   }
 
   .dashboard-subheading {
-    @apply text-sm text-stone-500 mb-6;
+    @apply text-sm mb-6;
+    color: #6a6258;
   }
 
   .dashboard-card-title {
-    @apply text-xl text-stone-900 mb-4;
+    @apply text-xl mb-4;
     font-family: 'DM Serif Display', serif;
+    color: #3a3228;
   }
 
   .dashboard-loading {
-    @apply text-center py-8 text-sm text-stone-400;
+    @apply text-center py-8 text-sm;
+    color: #8a7a68;
   }
 
   .dashboard-empty {
@@ -328,41 +398,49 @@
   }
 
   .dashboard-empty-title {
-    @apply text-lg text-stone-900 mb-2;
+    @apply text-lg mb-2;
     font-family: 'DM Serif Display', serif;
+    color: #3a3228;
   }
 
   .dashboard-empty-body {
-    @apply text-sm text-stone-500 mb-6;
+    @apply text-sm mb-6;
+    color: #6a6258;
   }
 
   .request-card {
-    @apply bg-white border border-stone-200 rounded-xl p-5
-           hover:border-amber-300 hover:shadow-sm
-           transition-all duration-150;
+    @apply bg-white rounded-xl p-5
+           hover:shadow-sm transition-all duration-150;
+    border: 1px solid #d8c8b0;
   }
 
+  .request-card:hover { border-color: #4a6a7a; }
+
   .request-meta {
-    @apply text-xs text-stone-400 font-medium;
+    @apply text-xs font-medium;
+    color: #8a7a68;
   }
 
   .request-category {
-    @apply text-xs text-stone-400 font-medium;
+    @apply text-xs font-medium;
+    color: #8a7a68;
   }
 
   .request-description {
-    @apply text-sm text-stone-700 mb-2;
+    @apply text-sm mb-2;
+    color: #3a3228;
   }
 
   .request-location {
-    @apply text-xs text-stone-500;
+    @apply text-xs;
+    color: #6a6258;
   }
 
   /* ─────────────────────────────────────────
      MODAL
   ───────────────────────────────────────── */
   .modal-overlay {
-    @apply fixed inset-0 bg-stone-900 bg-opacity-50
+    @apply fixed inset-0 bg-stone-900 bg-opacity-60
            flex items-center justify-center z-50 p-4;
   }
 
@@ -379,152 +457,262 @@
   }
 
   .modal-title {
-    @apply text-xl text-stone-900;
+    @apply text-xl;
     font-family: 'DM Serif Display', serif;
+    color: #3a3228;
   }
 
   .modal-close {
-    @apply text-stone-300 hover:text-stone-600 text-2xl transition-colors;
+    @apply text-2xl transition-colors;
+    color: #8a7a68;
     font-family: 'Inter', sans-serif;
   }
+
+  .modal-close:hover { color: #3a3228; }
 
   .modal-actions {
     @apply flex gap-3 mt-2;
   }
 
   .info-box {
-    @apply bg-amber-50 border border-amber-200 rounded-xl p-4;
+    @apply rounded-xl p-4;
+    background-color: #f0ece4;
+    border: 1px solid #d8c8b0;
   }
 
   .info-box-title {
-    @apply text-sm font-semibold text-amber-900 mb-1;
+    @apply text-sm font-semibold mb-1;
+    color: #3a3228;
   }
 
   .info-box-body {
-    @apply text-xs text-amber-800 space-y-1 list-decimal list-inside;
+    @apply text-xs space-y-1 list-decimal list-inside;
+    color: #5a4a38;
   }
 
   /* ─────────────────────────────────────────
      LANDING PAGE
   ───────────────────────────────────────── */
   .landing-page {
-    @apply bg-white;
     height: 100vh;
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    background: white;
   }
 
-  /* Full viewport hero — single page */
+  /* Hero — earthy taupe to slate blue gradient */
   .hero-section {
-    @apply relative overflow-hidden flex-1;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    @apply relative overflow-hidden;
+    flex: 1;
+    background:
+      radial-gradient(ellipse at 15% 60%, rgba(168, 152, 128, 0.5) 0%, transparent 55%),
+      radial-gradient(ellipse at 85% 30%, rgba(106, 122, 138, 0.5) 0%, transparent 50%),
+      radial-gradient(ellipse at 60% 80%, rgba(90, 90, 80, 0.3) 0%, transparent 45%),
+      linear-gradient(135deg, #f0ece4 0%, #e0d4c0 30%, #c8c0b0 55%, #b0b8c8 80%, #a0aec0 100%);
+  }
+  
+  .hero-corner-lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    transform: none;
   }
 
-  /* Single dark overlay */
-  .hero-section::before {
-    content: '';
-    @apply absolute inset-0;
-    background: rgba(28, 25, 23, 0.45);
-  }
-
-  /* Two column layout over image */
+  /* Two column layout */
   .hero-overlay-layout {
     @apply relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8
-           flex items-center justify-between gap-10;
+           flex items-center justify-between gap-8;
   }
 
-  /* Left — text on image */
+  /* Left — text */
   .hero-left-panel {
-    @apply flex-1 max-w-xl;
+    @apply flex-1 max-w-lg;
   }
 
-  /* Right — frosted glass box */
-  .hero-right-panel {
-    @apply rounded-2xl p-6;
-    width: 320px;
-    flex-shrink: 0;
-    background: rgba(255, 255, 255, 0.10);
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-  }
-
-  .how-it-works-title {
-    @apply text-xl text-white mb-1;
-    font-family: 'DM Serif Display', serif;
-  }
-
-  .how-it-works-sub {
-    @apply text-xs text-white mb-5;
-    opacity: 0.75;
-  }
-
-  .how-it-works-steps {
-    @apply flex flex-col gap-5;
-  }
-
-  .how-step {
-    @apply flex items-start gap-3;
-  }
-
-  .how-step-number {
-    @apply w-7 h-7 rounded-full flex items-center justify-center
-           text-white text-xs font-bold flex-shrink-0;
-    font-family: 'Inter', sans-serif;
-  }
-
-  .how-step-number-1 { @apply bg-amber-600; }
-  .how-step-number-2 { @apply bg-teal-600; }
-  .how-step-number-3 { @apply bg-stone-600; }
-
-  .how-step-content {
-    @apply flex-1;
-  }
-
-  .how-step-title {
-    @apply text-sm font-semibold text-white mb-0.5;
-    font-family: 'DM Serif Display', serif;
-  }
-
-  .how-step-body {
-    @apply text-xs text-white leading-relaxed;
-    opacity: 0.8;
-  }
-
-  /* Hero text */
   .hero-tag {
-    @apply inline-block bg-amber-600 text-white text-xs font-semibold
-           tracking-wide uppercase px-3 py-1 rounded-full mb-4;
+    @apply inline-block text-xs font-semibold
+           tracking-wide uppercase px-3 py-1 rounded-full mb-5;
+    background-color: rgba(58, 50, 40, 0.1);
+    color: #3a3228;
     font-family: 'Inter', sans-serif;
   }
 
   .hero-heading {
-    @apply text-4xl text-white mb-4;
+    @apply text-5xl mb-5;
+    color: #2a2418;
     font-family: 'DM Serif Display', serif;
-    line-height: 1.15;
+    line-height: 1.1;
   }
 
   .hero-heading-em {
-    color: #fbbf24;
+    color: #4a6a7a;
     font-style: italic;
     font-family: 'DM Serif Display', serif;
   }
 
   .hero-subheading {
-    @apply text-sm text-white mb-7 leading-relaxed;
-    opacity: 0.88;
+    @apply text-base mb-8 leading-relaxed;
+    color: #3a3228;
     font-family: 'Inter', sans-serif;
   }
 
   .hero-cta-row {
-    @apply flex flex-col sm:flex-row gap-3;
+    @apply flex flex-row gap-3 items-center;
+  }
+
+
+  /* ─────────────────────────────────────────
+    3D CAROUSEL
+  ───────────────────────────────────────── */
+  .hero-right-panel {
+    @apply relative flex-1 flex flex-col items-center justify-center gap-6;
+    height: 100%;
+    max-width: 45vw;
+  }
+
+  .carousel-3d {
+    position: relative;
+    width: 100%;
+    height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .carousel-3d-card {
+    position: absolute;
+    background: white;
+    border-radius: 16px;
+    border: 5px solid white;
+    outline: 1px solid #d8c8b0;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Front card — tall portrait, fully visible */
+  .carousel-3d-card--active {
+    width: 16vw;
+    height: 52vh;
+    transform: translateX(0) scale(1) translateZ(0);
+    z-index: 3;
+    box-shadow:
+      0 24px 60px rgba(58, 50, 40, 0.25),
+      0 8px 20px rgba(58, 50, 40, 0.15);
+    opacity: 1;
+  }
+
+  /* Right card — smaller, offset right, slightly behind */
+  .carousel-3d-card--next {
+    width: 13vw;
+    height: 42vh;
+    transform: translateX(11vw) scale(0.88) translateZ(-1px);
+    z-index: 2;
+    box-shadow: 0 12px 30px rgba(58, 50, 40, 0.15);
+    opacity: 0.75;
+    filter: brightness(0.92);
+  }
+
+  /* Left card — smaller, offset left, slightly behind */
+  .carousel-3d-card--prev {
+    width: 13vw;
+    height: 42vh;
+    transform: translateX(-11vw) scale(0.88) translateZ(-1px);
+    z-index: 2;
+    box-shadow: 0 12px 30px rgba(58, 50, 40, 0.15);
+    opacity: 0.75;
+    filter: brightness(0.92);
+  }
+
+  /* Any other cards — fully hidden */
+  .carousel-3d-card--hidden {
+    width: 10vw;
+    height: 35vh;
+    transform: translateX(0) scale(0.7);
+    z-index: 1;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .carousel-3d-img {
+    width: 100%;
+    flex: 1;
+    object-fit: cover;
+    min-height: 0;
+  }
+
+  .carousel-3d-content {
+    padding: 10px 14px 12px;
+    flex-shrink: 0;
+    background: white;
+  }
+
+  .carousel-3d-title {
+    font-size: clamp(0.7rem, 1vw, 0.95rem);
+    font-weight: 600;
+    color: #3a3228;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .carousel-3d-meta {
+    font-size: clamp(0.6rem, 0.75vw, 0.75rem);
+    color: #6a6258;
+    margin-top: 2px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .carousel-card-badge {
+    @apply text-xs font-semibold px-2 py-0.5 rounded-full;
+    background-color: #dce8f0;
+    color: #3a5a6a;
+    display: inline-block;
+    margin-top: 5px;
+    font-size: clamp(0.55rem, 0.7vw, 0.7rem);
+  }
+
+  .carousel-card-badge--pending {
+    background-color: #f0ece4;
+    color: #5a4a38;
+  }
+
+  .carousel-card-badge--done {
+    background-color: #e8e4dc;
+    color: #3a3228;
+  }
+
+  .carousel-dots {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    z-index: 10;
+  }
+
+  .carousel-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: none;
+    background-color: #d8c8b0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;
+  }
+
+  .carousel-dot--active {
+    background-color: #3a3228;
+    width: 24px;
+    border-radius: 4px;
   }
 
   /* ─────────────────────────────────────────
-     SECTIONS (kept for any future use)
+     SECTIONS
   ───────────────────────────────────────── */
   .section-white {
     @apply py-16 bg-white;
@@ -532,12 +720,12 @@
 
   .section-gray {
     @apply py-16;
-    background-color: #f5f0eb;
+    background: linear-gradient(135deg, #f0ece4 0%, #e0d8cc 100%);
   }
 
   .section-warm {
     @apply py-16;
-    background-color: #fdf6ee;
+    background-color: #f0ece4;
   }
 
   .section-header {
@@ -545,16 +733,18 @@
   }
 
   .section-heading {
-    @apply text-3xl text-stone-900 mb-3;
+    @apply text-3xl mb-3;
     font-family: 'DM Serif Display', serif;
+    color: #3a3228;
   }
 
   .section-subheading {
-    @apply text-sm text-stone-500 max-w-2xl mx-auto;
+    @apply text-sm max-w-2xl mx-auto;
+    color: #6a6258;
   }
 
   /* ─────────────────────────────────────────
-     STEPS (kept for dashboard use)
+     STEPS
   ───────────────────────────────────────── */
   .steps-grid {
     @apply grid md:grid-cols-3 gap-6;
@@ -562,11 +752,12 @@
 
   .step-icon-wrapper {
     @apply w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3;
+    background-color: #e8e0d4;
   }
 
-  .step-icon-wrapper-1 { @apply bg-amber-100; }
-  .step-icon-wrapper-2 { @apply bg-teal-100; }
-  .step-icon-wrapper-3 { @apply bg-stone-100; }
+  .step-icon-wrapper-1 { background-color: #e8e0d4; }
+  .step-icon-wrapper-2 { background-color: #dce8f0; }
+  .step-icon-wrapper-3 { background-color: #e0dcd4; }
 
   .step-number {
     @apply w-7 h-7 rounded-full flex items-center justify-center
@@ -574,17 +765,19 @@
     font-family: 'Inter', sans-serif;
   }
 
-  .step-number-1 { @apply bg-amber-700; }
-  .step-number-2 { @apply bg-teal-700; }
-  .step-number-3 { @apply bg-stone-700; }
+  .step-number-1 { background-color: #3a3228; }
+  .step-number-2 { background-color: #4a6a7a; }
+  .step-number-3 { background-color: #6a6258; }
 
   .step-title {
-    @apply text-base text-stone-800 mb-1 text-center;
+    @apply text-base mb-1 text-center;
     font-family: 'DM Serif Display', serif;
+    color: #3a3228;
   }
 
   .step-body {
-    @apply text-xs text-stone-500 leading-relaxed text-center;
+    @apply text-xs leading-relaxed text-center;
+    color: #6a6258;
   }
 
   /* ─────────────────────────────────────────
@@ -596,37 +789,33 @@
 
   .category-item {
     @apply flex items-center gap-3 p-3 rounded-xl
-           bg-white border border-stone-200
-           hover:border-amber-300 hover:bg-amber-50 hover:-translate-y-1
-           transition-all duration-150;
+           bg-white hover:-translate-y-1 transition-all duration-150;
+    border: 1px solid #d8c8b0;
   }
 
+  .category-item:hover { border-color: #4a6a7a; }
+
   .category-label {
-    @apply text-sm font-semibold text-stone-700;
+    @apply text-sm font-semibold;
+    color: #3a3228;
   }
 
   /* ─────────────────────────────────────────
      FOOTER
   ───────────────────────────────────────── */
   .footer {
-    @apply bg-stone-900 text-stone-400 py-3;
+    @apply py-2;
+    background-color: #2a2418;
+    color: #e8e7e6;
   }
 
   .footer-inner {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8
-           flex flex-col md:flex-row justify-between items-center gap-2;
-  }
-
-  .footer-links {
-    @apply flex gap-6;
-  }
-
-  .footer-link {
-    @apply hover:text-white transition-colors duration-150 text-xs font-medium;
-    color: #a8a29e;
+           flex flex-col md:flex-row justify-between items-center gap-3;
   }
 
   .footer-copy {
-    @apply text-xs text-stone-500;
+    @apply text-xs;
+    color: #f0f0f0;
   }
 }
