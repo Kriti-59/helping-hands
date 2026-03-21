@@ -1,9 +1,8 @@
 import json
-from google import genai
-from google.genai import types
+from groq import Groq
 from ..config import settings
 
-client = genai.Client(api_key=settings.API_KEY)
+client = Groq(api_key=settings.GROQ_API_KEY)
 
 CATEGORIES = {
     "local": [
@@ -18,19 +17,10 @@ CATEGORIES = {
 
 ALL_CATEGORIES = CATEGORIES["local"] + CATEGORIES["broad"]
 
-
 def classify_request(description: str, retries: int = 2) -> dict:
-    """
-    Use Google Gemini AI to classify help requests.
-    Retries on failure, raises a clean exception if all attempts fail.
-    """
     last_error = None
 
-    for attempt in range(retries):
-        try:
-            response = client.models.generate_content(
-                model='gemini-2.0-flash-lite',
-                contents=f"""Classify this community help request.
+    prompt = f"""Classify this community help request. Return ONLY valid JSON, nothing else.
 
 REQUEST: "{description}"
 
@@ -38,34 +28,43 @@ LOCAL categories (nearby volunteers): groceries, dog_walking, transportation, ya
 
 BROAD categories (organizations): legal_immigration, legal_housing, medical_advice, mental_health, job_placement
 
-URGENCY: high = today/urgent/ASAP, medium = this week, low = flexible""",
-                config=types.GenerateContentConfig(
-                    response_mime_type='application/json',
-                    response_schema={
-                        "type": "object",
-                        "properties": {
-                            "category":     {"type": "string", "enum": ALL_CATEGORIES},
-                            "routing_type": {"type": "string", "enum": ["local", "broad"]},
-                            "urgency":      {"type": "string", "enum": ["low", "medium", "high"]},
-                            "reasoning":    {"type": "string"}
-                        },
-                        "required": ["category", "routing_type", "urgency", "reasoning"]
-                    }
-                )
+URGENCY: high = today/urgent/ASAP, medium = this week, low = flexible
+
+Return this exact JSON structure:
+{{
+    "category": "one of the exact category names above",
+    "routing_type": "local or broad",
+    "urgency": "low, medium, or high",
+    "reasoning": "brief explanation"
+}}"""
+
+    for attempt in range(retries):
+        try:
+            response = client.chat.completions.create(
+                model="llama-3.1-8b-instant",
+                messages=[{"role": "user", "content": prompt}],
+                response_format={"type": "json_object"},
+                temperature=0.1
             )
 
-            result = json.loads(response.text)
+            result = json.loads(response.choices[0].message.content)
 
-            # Ensure routing_type is always consistent with the category
+            # Validate category
+            if result.get("category") not in ALL_CATEGORIES:
+                raise ValueError(f"Invalid category: {result.get('category')}")
+
+            # Ensure routing_type is consistent with category
             result["routing_type"] = "broad" if result["category"] in CATEGORIES["broad"] else "local"
 
-            print(f"✓ Gemini AI (attempt {attempt + 1}): {result}")
+            # Validate urgency
+            if result.get("urgency") not in ["low", "medium", "high"]:
+                result["urgency"] = "medium"
+
+            print(f"✓ Groq AI (attempt {attempt + 1}): {result}")
             return result
 
         except Exception as e:
             last_error = e
             print(f"❌ Classification attempt {attempt + 1} failed: {e}")
 
-    raise Exception(
-        f"We couldn't find helpers for your request right now. Please try again in a moment."
-    )
+    raise Exception("We couldn't find helpers for your request right now. Please try again in a moment.")
