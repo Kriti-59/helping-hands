@@ -32,7 +32,8 @@ class UserWithRequests(UserResponse):
     class Config:
         from_attributes = True
 
-# Update MatchUpdate validator (remove 'viewed')
+
+# Update MatchUpdate validator
 class MatchUpdate(BaseModel):
     status: str
 
@@ -43,11 +44,11 @@ class MatchUpdate(BaseModel):
         return v
     
 class RequestCreate(BaseModel):
-    """Schema for users creating requests - only fields they provide"""
+    """Schema for users creating requests"""
     description: str
+    address: Optional[str] = None
     latitude: Decimal
     longitude: Decimal
-    address: Optional[str] = None
 
 # Add schemas for contact info privacy
 class RequestPublicResponse(BaseModel):
@@ -75,64 +76,74 @@ class RequestPrivateResponse(RequestPublicResponse):
     class Config:
         from_attributes = True
 
-
-
-# ============================================
 # VOLUNTEER Schemas
-# ============================================
 
-class VolunteerBase(BaseModel):
+class VolunteerCreate(BaseModel):
     name: str
     email: EmailStr
-    phone: Optional[str] = None
+    password: str
+    phone: str
     bio: Optional[str] = None
-    categories: List[str]
-    latitude: Decimal
-    longitude: Decimal
     address: Optional[str] = None
-    radius_miles: int
-    availability_notes: Optional[str] = None
-
-class VolunteerCreate(VolunteerBase):
-    pass
+    latitude: float = 39.0997
+    longitude: float = -94.5786
+    radius_miles: int = 10
+    categories: List[str] = []
+    skills_experience: Optional[str] = None
+    has_vehicle: bool = False
+    can_lift_heavy: bool = False
+    languages: List[str] = []
 
 class VolunteerUpdate(BaseModel):
     name: Optional[str] = None
     phone: Optional[str] = None
     bio: Optional[str] = None
     categories: Optional[List[str]] = None
-    availability_notes: Optional[str] = None
+    skills_experience: Optional[str] = None
+    has_vehicle: Optional[bool] = None
+    can_lift_heavy: Optional[bool] = None
+    languages: Optional[List[str]] = None
     is_active: Optional[bool] = None
 
-class VolunteerResponse(VolunteerBase):
+class VolunteerResponse(BaseModel):
     id: uuid.UUID
-    is_active: bool
-    created_at: datetime
-    updated_at: datetime
-
-    class Config:
-        from_attributes = True
-
-
-# ============================================
-# ORGANIZATION Schemas
-# ============================================
-
-class OrganizationBase(BaseModel):
     name: str
     email: EmailStr
     phone: Optional[str] = None
     bio: Optional[str] = None
     categories: List[str]
-    latitude: Optional[Decimal] = None
-    longitude: Optional[Decimal] = None
+    skills_experience: Optional[str] = None
+    has_vehicle: bool
+    can_lift_heavy: bool
+    languages: Optional[List[str]] = None
+    latitude: Decimal
+    longitude: Decimal
+    address: Optional[str] = None
+    radius_miles: int
+    is_active: bool
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+# ============================================
+# ORGANIZATION Schemas
+# ============================================
+
+class OrganizationCreate(BaseModel):
+    name: str
+    email: EmailStr
+    password: str
+    phone: Optional[str] = None
+    bio: Optional[str] = None
+    categories: List[str] = []
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     address: Optional[str] = None
     service_area: Optional[str] = None
     organization_hours: Optional[str] = None
     website_url: Optional[str] = None
-
-class OrganizationCreate(OrganizationBase):
-    pass
 
 class OrganizationUpdate(BaseModel):
     name: Optional[str] = None
@@ -144,15 +155,25 @@ class OrganizationUpdate(BaseModel):
     website_url: Optional[str] = None
     is_active: Optional[bool] = None
 
-class OrganizationResponse(OrganizationBase):
+class OrganizationResponse(BaseModel):
     id: uuid.UUID
+    name: str
+    email: EmailStr
+    phone: Optional[str] = None
+    bio: Optional[str] = None
+    categories: List[str]
+    latitude: Optional[Decimal] = None
+    longitude: Optional[Decimal] = None
+    address: Optional[str] = None
+    service_area: Optional[str] = None
+    organization_hours: Optional[str] = None
+    website_url: Optional[str] = None
     is_active: bool
     created_at: datetime
-    updated_at: datetime
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
-
 
 # ============================================
 # REQUEST Schemas
@@ -186,7 +207,7 @@ class RequestResponse(BaseModel):
     accepted_by_organization_id: Optional[uuid.UUID] = None
     accepted_at: Optional[datetime] = None
     created_at: datetime
-    updated_at: datetime
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -269,3 +290,39 @@ class AIClassification(BaseModel):
         if v not in ['low', 'medium', 'high']:
             raise ValueError("urgency must be 'low', 'medium', or 'high'")
         return v
+    
+
+
+class RequestInMatch(BaseModel):
+    """Request details shown in match"""
+    id: uuid.UUID
+    description: str
+    category: str
+    urgency: str
+    address: Optional[str]
+    latitude: Decimal
+    longitude: Decimal
+    requester_name: str
+    requester_email: str
+    requester_phone: Optional[str]
+    status: str
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+class MatchResponse(BaseModel):
+    """Match with embedded request details"""
+    id: uuid.UUID
+    request_id: uuid.UUID
+    helper_type: str
+    volunteer_id: Optional[uuid.UUID]
+    organization_id: Optional[uuid.UUID]
+    status: str
+    distance_miles: Optional[Decimal]
+    created_at: datetime
+    request: RequestInMatch
+    
+    class Config:
+        from_attributes = True
