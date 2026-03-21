@@ -23,10 +23,10 @@ const CATEGORIES = [
 
 const COMMON_LANGUAGES = [
   'English', 'Spanish', 'French', 'Mandarin', 'Arabic',
-  'Hindi', 'Portuguese', 'Russian', 'Japanese', 'Korean'
+  'Hindi', 'Portuguese', 'Russian', 'Japanese', 'Korean',
+  'German', 'Swahili', 'Somali', 'Gujarati', 'Telugu',
 ]
 
-// Step indicator component
 function StepIndicator({ currentStep }) {
   const steps = ['Account', 'Location', 'Skills', 'Profile']
   return (
@@ -117,7 +117,7 @@ export default function VolunteerRegister() {
   const validateStep = () => {
     setError('')
     if (step === 1) {
-      if (!formData.name || !formData.email || !formData.password) {
+      if (!formData.name || !formData.email || !formData.password || !formData.phone) {
         setError('Please fill in all required fields')
         return false
       }
@@ -173,7 +173,7 @@ export default function VolunteerRegister() {
 
       const { token, user_id, user_type, name, email } = loginResponse.data
       login({ user_id, user_type, name, email }, token)
-      navigate('/volunteer/dashboard')
+      navigate('/helper/dashboard')
 
     } catch (err) {
       console.error('Registration error:', err)
@@ -186,20 +186,19 @@ export default function VolunteerRegister() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
 
-      {/* Header */}
       <div className="sm:mx-auto sm:w-full sm:max-w-lg">
         <Link to="/" className="flex items-center justify-center gap-2 mb-6">
+          <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-lg">H</span>
+          </div>
           <span className="text-2xl font-bold text-slate-800">Helping Hands</span>
         </Link>
-        <h2 className="text-center text-3xl font-bold text-slate-900">
-          Become a volunteer
-        </h2>
+        <h2 className="text-center text-3xl font-bold text-slate-900">Become a volunteer</h2>
         <p className="mt-2 text-center text-sm text-slate-500">
-          Sign up to help your community
+          Help your community — one request at a time
         </p>
       </div>
 
-      {/* Form card */}
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-lg">
         <div className="bg-white py-8 px-4 shadow-sm sm:rounded-lg sm:px-10 border border-gray-100">
 
@@ -222,15 +221,14 @@ export default function VolunteerRegister() {
               <div>
                 <label className="input-label">Email Address *</label>
                 <input name="email" type="email" value={formData.email}
-                  onChange={handleChange} className="input-field" />
+                  onChange={handleChange} className="input-field"/>
               </div>
-           <div>
-              <label className="input-label">Phone *</label>
-              <input name="phone" type="tel" value={formData.phone}
-                onChange={handleChange} className="input-field" 
-                placeholder="+1 (555) 000-0000"
-                required />
-            </div>
+              <div>
+                <label className="input-label">Phone *</label>
+                <input name="phone" type="tel" value={formData.phone}
+                  onChange={handleChange} className="input-field"
+                  required />
+              </div>
               <div>
                 <label className="input-label">Password *</label>
                 <input name="password" type="password" value={formData.password}
@@ -358,7 +356,7 @@ export default function VolunteerRegister() {
             </div>
           )}
 
-          {/* Navigation buttons */}
+          {/* Navigation */}
           <div className="flex gap-3 mt-8">
             {step > 1 && (
               <button type="button" onClick={handleBack} className="btn-ghost flex-1">
