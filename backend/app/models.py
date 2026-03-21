@@ -1,230 +1,109 @@
-from sqlalchemy import Column, String, Text, Integer, Boolean, DateTime, DECIMAL, CheckConstraint, Index, ARRAY, ForeignKey
+from sqlalchemy import Column, String, Integer, Boolean, DateTime, Text, Numeric, ForeignKey, ARRAY, func
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
-from passlib.context import CryptContext
-
-import uuid
-
+from pgvector.sqlalchemy import Vector
 from .database import Base
+import uuid
 
 
 class User(Base):
     __tablename__ = "users"
-
+    
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name = Column(String(255), nullable=False)
-    email = Column(String(255), unique=True, nullable=False, index=True)
-    password_hash = Column(String(255), nullable=False)
-    
-    # Status
+    name = Column(String, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    password_hash = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
-    
-    # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-    last_login = Column(DateTime(timezone=True))
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    last_login = Column(DateTime(timezone=True), nullable=True)
     
-    # Relationships
     requests = relationship("Request", back_populates="user")
 
-    def __repr__(self):
-        return f"<User(name={self.name}, email={self.email})>"
-    
-# ============================================
-# VOLUNTEERS Model
-# ============================================
+
 class Volunteer(Base):
     __tablename__ = "volunteers"
-
+    
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name = Column(String(255), nullable=False)
-    email = Column(String(255), unique=True, nullable=False, index=True)
-    phone = Column(String(50))
+    name = Column(String, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    password_hash = Column(String)
+    phone = Column(String, nullable=False)
     bio = Column(Text)
-    categories = Column(ARRAY(Text), nullable=False)
-    
-    # Location
-    latitude = Column(DECIMAL(10, 8), nullable=False)
-    longitude = Column(DECIMAL(11, 8), nullable=False)
-    address = Column(Text)
-    
-    # Volunteer-specific
-    radius_miles = Column(Integer, nullable=False)
+    categories = Column(ARRAY(String))
+    skills_experience = Column(Text)
+    has_vehicle = Column(Boolean, default=False)
+    can_lift_heavy = Column(Boolean, default=False)
+    languages = Column(ARRAY(String))
+    latitude = Column(Numeric(10, 7))
+    longitude = Column(Numeric(10, 7))
+    address = Column(String)
+    radius_miles = Column(Integer)
     availability_notes = Column(Text)
-    
-    # Status
     is_active = Column(Boolean, default=True)
-    
-    # Timestamps
+    bio_embedding = Column(Vector(3072))    
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-    
-    # Relationships
-    matches = relationship("Match", back_populates="volunteer", foreign_keys="Match.volunteer_id")
-    accepted_requests = relationship("Request", back_populates="accepted_volunteer", foreign_keys="Request.accepted_by_volunteer_id")
-
-    def __repr__(self):
-        return f"<Volunteer(name={self.name}, email={self.email})>"
-
-
-# ============================================
-# ORGANIZATIONS Model
-# ============================================
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
 class Organization(Base):
     __tablename__ = "organizations"
-
+    
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name = Column(String(255), nullable=False)
-    email = Column(String(255), unique=True, nullable=False, index=True)
-    phone = Column(String(50))
+    name = Column(String, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    password_hash = Column(String)
+    phone = Column(String)
     bio = Column(Text)
-    categories = Column(ARRAY(Text), nullable=False)
-    
-    # Location (optional for organizations)
-    latitude = Column(DECIMAL(10, 8))
-    longitude = Column(DECIMAL(11, 8))
-    address = Column(Text)
-    
-    # Organization-specific
-    service_area = Column(String(255))
-    organization_hours = Column(Text)
-    website_url = Column(String(500))
-    
-    # Status
+    categories = Column(ARRAY(String))
+    latitude = Column(Numeric(10, 7), nullable=True)
+    longitude = Column(Numeric(10, 7), nullable=True)
+    address = Column(String, nullable=True)
+    service_area = Column(String)
+    organization_hours = Column(String)
+    website_url = Column(String)
     is_active = Column(Boolean, default=True)
-    
-    # Timestamps
+    bio_embedding = Column(Vector(3072))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-    
-    # Relationships
-    matches = relationship("Match", back_populates="organization", foreign_keys="Match.organization_id")
-    accepted_requests = relationship("Request", back_populates="accepted_organization", foreign_keys="Request.accepted_by_organization_id")
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    def __repr__(self):
-        return f"<Organization(name={self.name}, email={self.email})>"
-
-
-# ============================================
-# REQUESTS Model
-# ============================================
 
 class Request(Base):
     __tablename__ = "requests"
-
+    
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
-
-    # Requester info
-    requester_name = Column(String(255), nullable=False)
-    requester_email = Column(String(255), nullable=False)
-    requester_phone = Column(String(50))
-    
-    # Request details
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
+    requester_name = Column(String, nullable=False)
+    requester_email = Column(String, nullable=False)
+    requester_phone = Column(String, nullable=True)
     description = Column(Text, nullable=False)
-    latitude = Column(DECIMAL(10, 8), nullable=False)
-    longitude = Column(DECIMAL(11, 8), nullable=False)
-    address = Column(Text)
-    
-    # AI-determined classification
-    category = Column(String(50), nullable=False)
-    routing_type = Column(String(20), nullable=False)
-    urgency = Column(String(20), nullable=False)
-    
-    # Status
-    status = Column(String(50), default='pending')
-    
-    # Acceptance tracking
-    accepted_by_volunteer_id = Column(UUID(as_uuid=True), ForeignKey('volunteers.id', ondelete='SET NULL'))
-    accepted_by_organization_id = Column(UUID(as_uuid=True), ForeignKey('organizations.id', ondelete='SET NULL'))
-    accepted_at = Column(DateTime(timezone=True))
-    
-    # Timestamps
+    latitude = Column(Numeric(10, 7), nullable=False)
+    longitude = Column(Numeric(10, 7), nullable=False)
+    address = Column(String, nullable=True)
+    category = Column(String, nullable=False)
+    routing_type = Column(String, nullable=False)
+    urgency = Column(String, nullable=False)
+    status = Column(String, default="pending")
+    accepted_by_volunteer_id = Column(UUID(as_uuid=True), ForeignKey('volunteers.id'), nullable=True)
+    accepted_by_organization_id = Column(UUID(as_uuid=True), ForeignKey('organizations.id'), nullable=True)
+    accepted_at = Column(DateTime(timezone=True), nullable=True)
+    description_embedding = Column(Vector(3072)) 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
-    # Relationships
-    matches = relationship("Match", back_populates="request", cascade="all, delete-orphan")
-    accepted_volunteer = relationship("Volunteer", back_populates="accepted_requests", foreign_keys=[accepted_by_volunteer_id])
-    accepted_organization = relationship("Organization", back_populates="accepted_requests", foreign_keys=[accepted_by_organization_id])
     user = relationship("User", back_populates="requests")
-    
-    # Constraints
-    __table_args__ = (
-        CheckConstraint(
-            "routing_type IN ('local', 'broad')",
-            name='check_routing_type'
-        ),
-        CheckConstraint(
-            "urgency IN ('low', 'medium', 'high')",
-            name='check_urgency'
-        ),
-        CheckConstraint(
-            "status IN ('pending', 'matched', 'in_progress', 'completed', 'cancelled', 'no_matches')",
-            name='check_status'
-        ),
-        Index('idx_requests_status', 'status'),
-        Index('idx_requests_category', 'category'),
-        Index('idx_requests_created_at', 'created_at'),
-    )
+    matches = relationship("Match", back_populates="request")
 
-    def __repr__(self):
-        return f"<Request(requester={self.requester_name}, category={self.category}, status={self.status})>"
-
-
-# ============================================
-# MATCHES Model
-# ============================================
 
 class Match(Base):
     __tablename__ = "matches"
-
+    
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    request_id = Column(UUID(as_uuid=True), ForeignKey('requests.id', ondelete='CASCADE'), nullable=False)
-    
-    # Helper type and references
-    helper_type = Column(String(20), nullable=False)
-    volunteer_id = Column(UUID(as_uuid=True), ForeignKey('volunteers.id', ondelete='CASCADE'))
-    organization_id = Column(UUID(as_uuid=True), ForeignKey('organizations.id', ondelete='CASCADE'))
-    
-    # Match status
-    status = Column(String(50), default='notified')
-    
-    # Distance (for local requests)
-    distance_miles = Column(DECIMAL(10, 2))
-    
-    # Timestamps
+    request_id = Column(UUID(as_uuid=True), ForeignKey('requests.id'), nullable=False)
+    helper_type = Column(String, nullable=False)
+    volunteer_id = Column(UUID(as_uuid=True), ForeignKey('volunteers.id'), nullable=True)
+    organization_id = Column(UUID(as_uuid=True), ForeignKey('organizations.id'), nullable=True)
+    status = Column(String, default="notified")
+    distance_miles = Column(Numeric(10, 2), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     
-    # Relationships
     request = relationship("Request", back_populates="matches")
-    volunteer = relationship("Volunteer", back_populates="matches", foreign_keys=[volunteer_id])
-    organization = relationship("Organization", back_populates="matches", foreign_keys=[organization_id])
-    
-    # Constraints
-    __table_args__ = (
-        CheckConstraint(
-            "helper_type IN ('volunteer', 'organization')",
-            name='check_helper_type'
-        ),
-        CheckConstraint(
-            "status IN ('notified', 'viewed', 'accepted', 'declined')",
-            name='check_match_status'
-        ),
-        CheckConstraint(
-            "(helper_type = 'volunteer' AND volunteer_id IS NOT NULL AND organization_id IS NULL) OR "
-            "(helper_type = 'organization' AND organization_id IS NOT NULL AND volunteer_id IS NULL)",
-            name='check_helper_integrity'
-        ),
-        Index('idx_matches_request', 'request_id'),
-        Index('idx_matches_volunteer', 'volunteer_id'),
-        Index('idx_matches_organization', 'organization_id'),
-        Index('idx_matches_status', 'status'),
-    )
-
-    def __repr__(self):
-        helper = f"volunteer_id={self.volunteer_id}" if self.helper_type == 'volunteer' else f"organization_id={self.organization_id}"
-        return f"<Match(request_id={self.request_id}, {helper}, status={self.status})>"
