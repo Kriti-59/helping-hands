@@ -220,16 +220,29 @@ body {
      AUTH PAGES
   ───────────────────────────────────────── */
   .auth-page {
-    @apply min-h-screen flex flex-col justify-center py-16 px-6;
-    background: linear-gradient(135deg, #f0ece4 0%, #e0d8cc 50%, #d8e0e8 100%);
+    height: 100vh;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2rem 1.5rem;
+    position: relative;
+    background:
+      radial-gradient(ellipse at 15% 60%, rgba(168, 152, 128, 0.5) 0%, transparent 55%),
+      radial-gradient(ellipse at 85% 30%, rgba(106, 122, 138, 0.5) 0%, transparent 50%),
+      radial-gradient(ellipse at 60% 80%, rgba(90, 90, 80, 0.3) 0%, transparent 45%),
+      linear-gradient(135deg, #f0ece4 0%, #e0d4c0 30%, #c8c0b0 55%, #b0b8c8 80%, #a0aec0 100%);
   }
+  
 
   .auth-col {
     @apply mx-auto w-full max-w-sm;
+    border: relative;
+    z-index: 1;
   }
 
   .auth-card {
-    @apply bg-white rounded-2xl px-8 py-8;
+    @apply bg-stone-100 rounded-2xl px-8 py-8;
     border: 1px solid #d8c8b0;
   }
 
@@ -239,25 +252,25 @@ body {
 
   .auth-logo-icon {
     @apply w-10 h-10 rounded-xl flex items-center justify-center;
-    background-color: #3a3228;
+    background-color: #e1dbd3;
   }
 
   .auth-logo-text {
-    @apply text-2xl;
+    @apply text-3xl;
     color: #3a3228;
     font-family: 'DM Serif Display', serif;
   }
 
   .auth-heading {
-    @apply text-center text-3xl mb-2;
+    @apply text-center text-2xl mb-2;
     font-family: 'DM Serif Display', serif;
     color: #3a3228;
   }
 
   .auth-subheading {
     @apply text-center text-sm mb-0;
-    color: #6a6258;
-    font-family: 'Inter', sans-serif;
+    color: #524639;
+    font-family: 'DM Serif Display', sans-serif;
   }
 
   .auth-form {
@@ -326,7 +339,7 @@ body {
   .navbar-inner {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8
            flex justify-between items-center;
-    height: 64px;
+    height: 48px;
   }
 
   .navbar-logo {
@@ -543,7 +556,7 @@ body {
   }
 
   .hero-heading {
-    @apply text-5xl mb-5;
+    @apply text-xl mb-5;
     color: #2a2418;
     font-family: 'DM Serif Display', serif;
     line-height: 1.1;
