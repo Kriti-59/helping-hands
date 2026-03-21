@@ -10,8 +10,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Initialize Gemini client
-client = genai.Client(api_key=settings.API_KEY)
-
+client = genai.Client(api_key=settings.EMBEDDING_API_KEY)
 
 def generate_embedding(text: str) -> list[float]:
     """
@@ -31,9 +30,9 @@ def generate_embedding(text: str) -> list[float]:
     """
     try:
         result = client.models.embed_content(
-            model='models/gemini-embedding-001',
-            contents=text
-        )
+        model='models/gemini-embedding-2-preview',
+        contents=text
+    )
         
         embedding = list(result.embeddings[0].values)       
         logger.info(f"✓ Generated embedding (dim: {len(embedding)}) for: {text[:50]}...")
@@ -45,20 +44,22 @@ def generate_embedding(text: str) -> list[float]:
 
 
 def generate_volunteer_embedding(volunteer) -> list[float]:
-    """Generate embedding for a volunteer based on their complete profile."""
     categories_text = ", ".join(volunteer.categories) if volunteer.categories else "General help"
+    languages_text = ", ".join(volunteer.languages) if volunteer.languages else "English"
     
     profile_text = f"""
     Volunteer Profile:
     Name: {volunteer.name}
     Skills and Categories: {categories_text}
-    Bio: {volunteer.bio or "Ready to help"}
-    Availability: {volunteer.availability_notes or "Available to help"}
-    Service Area: Within {volunteer.radius_miles} miles of {volunteer.address or "their location"}
+    Experience: {volunteer.skills_experience or "Ready to help"}
+    Bio: {volunteer.bio or ""}
+    Languages: {languages_text}
+    Has vehicle: {"yes" if volunteer.has_vehicle else "no"}
+    Can lift heavy items: {"yes" if volunteer.can_lift_heavy else "no"}
+    Service Area: Within {volunteer.radius_miles or 10} miles of {volunteer.address or "their location"}
     """
     
     return generate_embedding(profile_text.strip())
-
 
 def generate_organization_embedding(organization) -> list[float]:
     """Generate embedding for an organization based on their profile."""
