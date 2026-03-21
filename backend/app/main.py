@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .routers import auth, users, requests, volunteers, organizations, matches
+import logging
+logging.basicConfig(level=logging.INFO)
 
 app = FastAPI(title="Helping Hands API")
 
