@@ -267,21 +267,24 @@ function RequestFormModal({ onClose, onSuccess, userId }) {
     address: '',
     latitude: 39.0997,
     longitude: -94.5786,
+    timing: 'flexible',
+    duration: '',
+    physical_help: false,
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-
+ 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-
+ 
     if (!formData.description.trim()) {
       setError('Please describe what you need help with')
       return
     }
-
+ 
     setLoading(true)
-
+ 
     try {
       await requestAPI.create(formData, userId)
       onSuccess()
@@ -292,23 +295,15 @@ function RequestFormModal({ onClose, onSuccess, userId }) {
       setLoading(false)
     }
   }
-
+ 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
-          
-          {/* Header */}
+
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-slate-900">
-              Submit Help Request
-            </h2>
-            <button
-              onClick={onClose}
-              className="text-slate-400 hover:text-slate-600 text-2xl"
-            >
-              ×
-            </button>
+            <h2 className="text-2xl font-bold text-slate-900">Submit Help Request</h2>
+            <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-2xl">×</button>
           </div>
 
           {error && (
@@ -317,20 +312,17 @@ function RequestFormModal({ onClose, onSuccess, userId }) {
             </div>
           )}
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
-            
+
             {/* Description */}
             <div>
-              <label className="input-label">
-                What do you need help with? *
-              </label>
+              <label className="input-label">What do you need help with? *</label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 className="input-field resize-none"
                 rows="4"
-                placeholder="Example: I need help walking my golden retriever this afternoon around 3pm. He's friendly and loves people!"
+                placeholder="Example: I need help walking my golden retriever. He's friendly and loves people!"
                 required
               />
               <p className="text-xs text-slate-500 mt-1">
@@ -338,11 +330,53 @@ function RequestFormModal({ onClose, onSuccess, userId }) {
               </p>
             </div>
 
-            {/* Address */}
-            <div>
-              <label className="input-label">
-                Location (Optional)
+            {/* Timing + Duration — side by side */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="input-label">When do you need help?</label>
+                <select
+                  value={formData.timing}
+                  onChange={(e) => setFormData({ ...formData, timing: e.target.value })}
+                  className="input-field"
+                >
+                  <option value="today">Today</option>
+                  <option value="this_week">This week</option>
+                  <option value="flexible">Flexible</option>
+                </select>
+              </div>
+              <div>
+                <label className="input-label">How long will it take?</label>
+                <select
+                  value={formData.duration}
+                  onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                  className="input-field"
+                >
+                  <option value="">Not sure</option>
+                  <option value="under_1hr">Under 1 hour</option>
+                  <option value="1_2hrs">1–2 hours</option>
+                  <option value="half_day">Half day (3–4 hrs)</option>
+                  <option value="full_day">Full day</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Physical help checkbox */}
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="physical_help"
+                checked={formData.physical_help}
+                onChange={(e) => setFormData({ ...formData, physical_help: e.target.checked })}
+                className="w-4 h-4 rounded border-gray-300 text-primary-600"
+              />
+              <label htmlFor="physical_help" className="text-sm text-slate-700">
+                This task requires physical help (heavy lifting, moving, etc.)
               </label>
+            </div>
+
+            {/* Location */}
+            <div>
+              <label className="input-label">Location (Optional)</label>
               <input
                 type="text"
                 value={formData.address}
@@ -355,14 +389,12 @@ function RequestFormModal({ onClose, onSuccess, userId }) {
               </p>
             </div>
 
-            {/* Info Box */}
+            {/* Info box */}
             <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
               <div className="flex gap-3">
                 <span className="text-2xl">ℹ️</span>
                 <div>
-                  <p className="text-sm font-medium text-blue-900 mb-1">
-                    What happens next?
-                  </p>
+                  <p className="text-sm font-medium text-blue-900 mb-1">What happens next?</p>
                   <ol className="text-sm text-blue-700 space-y-1 list-decimal list-inside">
                     <li>We'll classify your request using AI</li>
                     <li>Find the best volunteers or organizations</li>
@@ -373,23 +405,13 @@ function RequestFormModal({ onClose, onSuccess, userId }) {
               </div>
             </div>
 
-            {/* Buttons */}
             <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={onClose}
-                className="btn-ghost flex-1"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="btn-primary flex-1"
-              >
+              <button type="button" onClick={onClose} className="btn-ghost flex-1">Cancel</button>
+              <button type="submit" disabled={loading} className="btn-primary flex-1">
                 {loading ? 'Submitting...' : 'Submit Request'}
               </button>
             </div>
+
           </form>
         </div>
       </div>
