@@ -220,12 +220,12 @@ body {
      AUTH PAGES
   ───────────────────────────────────────── */
   .auth-page {
-    height: 100vh;
+    min-height: 100vh;
     overflow: auto;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    padding: 2rem 1.5rem;
+    justify-content: flex-start;
+    padding: 1rem 1.5rem;
     position: relative;
     background:
       radial-gradient(ellipse at 15% 60%, rgba(168, 152, 128, 0.5) 0%, transparent 55%),
@@ -237,12 +237,12 @@ body {
 
   .auth-col {
     @apply mx-auto w-full max-w-sm;
-    border: relative;
+    position: relative;
     z-index: 1;
   }
 
   .auth-card {
-    @apply bg-stone-100 rounded-2xl px-8 py-8;
+    @apply bg-stone-100 rounded-2xl px-6 py-6;
     border: 1px solid #d8c8b0;
   }
 
@@ -274,7 +274,7 @@ body {
   }
 
   .auth-form {
-    @apply space-y-5;
+    @apply space-y-3;
   }
 
   .auth-error {
@@ -526,7 +526,7 @@ body {
   }
   
   .hero-corner-lines {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
