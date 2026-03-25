@@ -30,27 +30,36 @@ const COMMON_LANGUAGES = [
 function StepIndicator({ currentStep }) {
   const steps = ['Account', 'Location', 'Skills', 'Profile']
   return (
-    <div className="flex items-center justify-center gap-2 mb-8">
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
       {steps.map((step, index) => {
         const stepNum = index + 1
         const isCompleted = currentStep > stepNum
         const isCurrent = currentStep === stepNum
         return (
-          <div key={step} className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5">
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-colors
-                ${isCompleted ? 'bg-primary-600 text-white' : ''}
-                ${isCurrent ? 'bg-primary-600 text-white' : ''}
-                ${!isCompleted && !isCurrent ? 'bg-gray-200 text-slate-500' : ''}
-              `}>
+          <div key={step} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+              <div style={{
+                width: '1.75rem', height: '1.75rem', borderRadius: '50%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '0.75rem', fontWeight: 500,
+                backgroundColor: isCompleted || isCurrent ? '#3a3228' : '#e0d8cc',
+                color: isCompleted || isCurrent ? 'white' : '#6a6258',
+              }}>
                 {isCompleted ? '✓' : stepNum}
               </div>
-              <span className={`text-xs hidden sm:block ${isCurrent ? 'text-slate-900 font-medium' : 'text-slate-400'}`}>
+              <span style={{
+                fontSize: '0.75rem',
+                color: isCurrent ? '#3a3228' : '#8a7a68',
+                fontWeight: isCurrent ? 600 : 400,
+              }}>
                 {step}
               </span>
             </div>
             {index < steps.length - 1 && (
-              <div className={`w-8 h-px ${currentStep > stepNum ? 'bg-primary-600' : 'bg-gray-200'}`} />
+              <div style={{
+                width: '2rem', height: '1px',
+                backgroundColor: currentStep > stepNum ? '#3a3228' : '#d8c8b0'
+              }} />
             )}
           </div>
         )
@@ -184,35 +193,68 @@ export default function VolunteerRegister() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-
-      <div className="sm:mx-auto sm:w-full sm:max-w-lg">
-        <Link to="/" className="flex items-center justify-center gap-2 mb-6">
-          <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-lg">H</span>
+    <div className="auth-page">
+      <svg className="hero-corner-lines" viewBox="0 0 1440 800" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="fadeTop" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#3a3228" stopOpacity="0"/>
+            <stop offset="15%" stopColor="#3a3228" stopOpacity="1"/>
+            <stop offset="85%" stopColor="#3a3228" stopOpacity="1"/>
+            <stop offset="100%" stopColor="#3a3228" stopOpacity="0"/>
+          </linearGradient>
+          <linearGradient id="fadeTopThin" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#6a6258" stopOpacity="0"/>
+            <stop offset="15%" stopColor="#6a6258" stopOpacity="1"/>
+            <stop offset="85%" stopColor="#6a6258" stopOpacity="1"/>
+            <stop offset="100%" stopColor="#6a6258" stopOpacity="0"/>
+          </linearGradient>
+          <linearGradient id="fadeBottom" x1="100%" y1="0%" x2="0%" y2="0%">
+            <stop offset="0%" stopColor="#4a6a7a" stopOpacity="0"/>
+            <stop offset="15%" stopColor="#4a6a7a" stopOpacity="1"/>
+            <stop offset="85%" stopColor="#4a6a7a" stopOpacity="1"/>
+            <stop offset="100%" stopColor="#4a6a7a" stopOpacity="0"/>
+          </linearGradient>
+          <linearGradient id="fadeBottomThin" x1="100%" y1="0%" x2="0%" y2="0%">
+            <stop offset="0%" stopColor="#304651" stopOpacity="0"/>
+            <stop offset="15%" stopColor="#304651" stopOpacity="1"/>
+            <stop offset="85%" stopColor="#304651" stopOpacity="1"/>
+            <stop offset="100%" stopColor="#304651" stopOpacity="0"/>
+          </linearGradient>
+        </defs>
+        <path d="M0 350 C100 350 200 180 340 160 C480 140 560 240 700 220 C840 200 920 120 1060 100"
+          fill="none" stroke="url(#fadeTop)" strokeWidth="16" strokeLinecap="round" opacity="0.22"/>
+        <path d="M-4.23 263.48 C83.5 285.91 227.39 124.36 368.81 124.04 C510.23 123.72 575.53 233.88 716.95 233.56 C858.37 233.24 948.73 165.15 1090.15 164.83"
+          fill="none" stroke="url(#fadeTopThin)" strokeWidth="4" strokeLinecap="round" opacity="0.1"/>
+        <path d="M1440 450 C1340 450 1240 620 1100 640 C960 660 880 560 740 580 C600 600 520 680 380 700"
+          fill="none" stroke="url(#fadeBottom)" strokeWidth="16" strokeLinecap="round" opacity="0.25"/>
+        <path d="M1445.88 525.93 C1346.85 512.01 1214.26 665.05 1072.84 665.37 C931.42 665.69 866.12 555.53 724.7 555.85 C583.27 556.18 492.92 624.26 351.5 624.58"
+          fill="none" stroke="url(#fadeBottomThin)" strokeWidth="4" strokeLinecap="round" opacity="0.2"/>
+      </svg>
+      <div className="auth-col" style={{ maxWidth: '32rem' }}>
+        <Link to="/" className="auth-logo">
+          <div className="auth-logo-icon">
+            <span>H</span>
           </div>
-          <span className="text-2xl font-bold text-slate-800">Helping Hands</span>
+          <span className="auth-logo-text">Helping Hands</span>
         </Link>
-        <h2 className="text-center text-3xl font-bold text-slate-900">Become a volunteer</h2>
-        <p className="mt-2 text-center text-sm text-slate-500">
+        <h2 className="auth-heading">Become a volunteer</h2>
+        <p className="auth-subheading">
           Help your community — one request at a time
         </p>
-      </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-lg">
-        <div className="bg-white py-8 px-4 shadow-sm sm:rounded-lg sm:px-10 border border-gray-100">
+      <div className="auth-card">
 
           <StepIndicator currentStep={step} />
 
           {error && (
-            <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+            <div className="auth-error">
               {error}
             </div>
           )}
 
-          {/* Step 1 — Account */}
+          {/* Step 1 — Account */}  
           {step === 1 && (
-            <div className="space-y-5">
+            <div className="auth-form">
               <div>
                 <label className="input-label">Full Name *</label>
                 <input name="name" type="text" value={formData.name}
@@ -245,9 +287,9 @@ export default function VolunteerRegister() {
 
           {/* Step 2 — Location */}
           {step === 2 && (
-            <div className="space-y-5">
-              <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 text-sm text-blue-700">
-                Your address is used to match you with nearby requests. It's never shown publicly.
+            <div className="auth-form">
+              <div className="info-box">
+                <p className="info-box-body">Your address is used to match you with nearby requests. It's never shown publicly.</p>
               </div>
               <div>
                 <label className="input-label">Your Address *</label>
@@ -257,14 +299,14 @@ export default function VolunteerRegister() {
               </div>
               <div>
                 <label className="input-label">
-                  How far are you willing to travel? — <span className="text-primary-600 font-medium">{formData.radius_miles} miles</span>
+                  How far are you willing to travel? — <span style={{ color: '#4a6a7a', fontWeight: 600 }}>{formData.radius_miles} miles</span>
                 </label>
                 <input name="radius_miles" type="range" min="1" max="50" step="1"
                   value={formData.radius_miles} onChange={handleChange}
                   className="w-full mt-2" />
-                <div className="flex justify-between text-xs text-slate-400 mt-1">
-                  <span>1 mile</span>
-                  <span>50 miles</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span className="input-hint">1 mile</span>
+                  <span className="input-hint">50 miles</span>
                 </div>
               </div>
             </div>
@@ -272,20 +314,17 @@ export default function VolunteerRegister() {
 
           {/* Step 3 — Skills */}
           {step === 3 && (
-            <div className="space-y-5">
+            <div className="auth-form">
               <div>
                 <label className="input-label">What can you help with? * (select all that apply)</label>
-                <div className="grid grid-cols-2 gap-2 mt-2">
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginTop: '0.5rem' }}>
                   {CATEGORIES.map(cat => (
                     <button
                       key={cat.value}
                       type="button"
                       onClick={() => toggleCategory(cat.value)}
-                      className={`text-left px-3 py-2 rounded-lg border text-sm transition-colors
-                        ${formData.categories.includes(cat.value)
-                          ? 'border-primary-500 bg-primary-50 text-primary-700'
-                          : 'border-gray-200 text-slate-600 hover:border-gray-300'
-                        }`}
+                      className={formData.categories.includes(cat.value) ? 'btn-secondary' : 'btn-ghost'}
+                      style={{ textAlign: 'left', fontSize: '0.8rem', padding: '0.4rem 0.75rem' }}
                     >
                       {cat.label}
                     </button>
@@ -296,23 +335,20 @@ export default function VolunteerRegister() {
               <div>
                 <label className="input-label">Describe your experience *</label>
                 <textarea name="skills_experience" value={formData.skills_experience}
-                  onChange={handleChange} className="input-field resize-none" rows="3"
+                  onChange={handleChange} className="input-field" style={{ resize: 'none' }} rows="3"
                   placeholder="e.g. I've been walking dogs for 5 years and am comfortable with large breeds. I also have a truck and have helped several families move." />
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="input-hint">
                   The more detail you provide, the better we can match you with relevant requests.
                 </p>
               </div>
 
               <div>
                 <label className="input-label">Languages spoken</label>
-                <div className="flex flex-wrap gap-2 mt-2">
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
                   {COMMON_LANGUAGES.map(lang => (
                     <button key={lang} type="button" onClick={() => toggleLanguage(lang)}
-                      className={`px-3 py-1 rounded-full border text-sm transition-colors
-                        ${formData.languages.includes(lang)
-                          ? 'border-primary-500 bg-primary-50 text-primary-700'
-                          : 'border-gray-200 text-slate-600 hover:border-gray-300'
-                        }`}
+                      className={formData.languages.includes(lang) ? 'btn-secondary' : 'btn-ghost'}
+                      style={{ fontSize: '0.8rem', padding: '0.25rem 0.75rem' }}
                     >
                       {lang}
                     </button>
@@ -320,17 +356,17 @@ export default function VolunteerRegister() {
                 </div>
               </div>
 
-              <div className="space-y-3">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 <label className="input-label">Additional capabilities</label>
-                <label className="flex items-center gap-3 cursor-pointer">
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
                   <input type="checkbox" name="has_vehicle" checked={formData.has_vehicle}
-                    onChange={handleChange} className="w-4 h-4 rounded border-gray-300 text-primary-600" />
-                  <span className="text-sm text-slate-700">Own a car or truck available</span>
+                    onChange={handleChange} style={{ width: '1rem', height: '1rem' }}/>
+                  <span style={{ fontSize: '0.875rem', color: '#3a3228' }}>Own a car or truck available</span>
                 </label>
-                <label className="flex items-center gap-3 cursor-pointer">
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
                   <input type="checkbox" name="can_lift_heavy" checked={formData.can_lift_heavy}
-                    onChange={handleChange} className="w-4 h-4 rounded border-gray-300 text-primary-600" />
-                  <span className="text-sm text-slate-700">Can help with heavy lifting</span>
+                    onChange={handleChange} style={{ width: '1rem', height: '1rem' }}/>
+                  <span style={{ fontSize: '0.875rem', color: '#3a3228' }}>Can help with heavy lifting</span>
                 </label>
               </div>
             </div>
@@ -338,37 +374,37 @@ export default function VolunteerRegister() {
 
           {/* Step 4 — Profile */}
           {step === 4 && (
-            <div className="space-y-5">
+            <div className="auth-form">
               <div>
                 <label className="input-label">Bio (Optional)</label>
                 <textarea name="bio" value={formData.bio} onChange={handleChange}
-                  className="input-field resize-none" rows="4"
+                  className="input-field" style={{ resize: 'none' }} rows="4"
                   placeholder="Tell the community a little about yourself and why you love volunteering..." />
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="input-hint">
                   This info is revealed to users after you accept their request.
                 </p>
               </div>
 
-              <div className="bg-green-50 border border-green-100 rounded-lg p-4 text-sm text-green-700">
-                <p className="font-medium mb-1">You're almost done!</p>
-                <p>Once you register, you'll start getting help requests in your area that match your skills.</p>
+              <div className="info-box">
+                <p className="info-box-title">You're almost done!</p>
+                <p className="input-hint">Once you register, you'll start getting help requests in your area that match your skills.</p>
               </div>
             </div>
           )}
 
           {/* Navigation */}
-          <div className="flex gap-3 mt-8">
+          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
             {step > 1 && (
-              <button type="button" onClick={handleBack} className="btn-ghost flex-1">
+              <button type="button" onClick={handleBack} className="btn-ghost" style={{ flex: 1 }}>
                 Back
               </button>
             )}
             {step < 4 ? (
-              <button type="button" onClick={handleNext} className="btn-primary flex-1">
+              <button type="button" onClick={handleNext} className="btn-primary" style={{ flex: 1 }}>
                 Continue
               </button>
             ) : (
-              <button type="button" onClick={handleSubmit} disabled={loading} className="btn-primary flex-1">
+              <button type="button" onClick={handleSubmit} disabled={loading} className="btn-primary" style={{ flex: 1 }}>
                 {loading ? 'Creating account...' : 'Complete Registration'}
               </button>
             )}
@@ -376,27 +412,29 @@ export default function VolunteerRegister() {
 
           {/* Footer links */}
           {step === 1 && (
-            <div className="mt-6 space-y-3">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-200" />
+            <div style={{ marginTop: '1.5rem' }}>
+              <div className="auth-divider">
+                <div className="auth-divider-line">
+                  <div className="w-full border-t border-stone-200" />
                 </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-slate-500">Already have an account?</span>
+                <div className="auth-divider-text">
+                  <span className="auth-divider-label">Already have an account?</span>
                 </div>
               </div>
+              <div className="mt-4">
               <Link to="/login" className="w-full btn-outline block text-center">Sign In</Link>
-              <p className="text-center text-sm text-slate-500">
+              </div>
+              <p className="auth-secondary-link">
                 Need help instead?{' '}
-                <Link to="/register" className="text-primary-600 hover:text-primary-700 font-medium">
+                <Link to="/register" className="auth-link">
                   Register as a user
                 </Link>
               </p>
             </div>
           )}
 
-        </div>
       </div>
     </div>
+  </div>
   )
 }
