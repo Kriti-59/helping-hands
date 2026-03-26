@@ -31,104 +31,101 @@ export default function UserDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="db-layout">
       
-      {/* Navbar */}
-      <nav className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">H</span>
-              </div>
-              <span className="text-xl font-bold text-slate-800">Helping Hands</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-slate-600">Welcome, {user.name}!</span>
-              <button onClick={handleLogout} className="btn-ghost text-sm">
-                Sign Out
-              </button>
-            </div>
-          </div>
+      {/* Sidebar */}
+      <aside className="db-sidebar">
+        <div className="db-sidebar-logo">
+          <div className="db-sidebar-logo-icon">HH</div>
+          <span className="db-sidebar-logo-text">Helping Hands</span>
         </div>
-      </nav>
+
+        <nav className="db-sidebar-nav">
+          <button className="db-sidebar-link db-sidebar-link--active">
+            <div className="db-sidebar-dot" style={{ background: '#c8b8a0' }} />
+            My Requests
+          </button>
+          <button className="db-sidebar-link" onClick={() => setShowRequestForm(true)}>
+            <div className="db-sidebar-dot" style={{ background: '#a0b880' }} />
+            New Request
+          </button>
+          <button className="db-sidebar-link">
+            <div className="db-sidebar-dot" style={{ background: '#7a9aaa' }} />
+            History
+          </button>
+        </nav>
+
+        <div className="db-sidebar-bottom">
+          <div className="db-sidebar-user">
+            <div className="db-sidebar-avatar">{user.name?.[0]?.toUpperCase()}</div>
+            <span className="db-sidebar-username">{user.name}</span>
+          </div>
+          <button className="db-sidebar-link" onClick={handleLogout}>
+            <div className="db-sidebar-dot" style={{ background: '#a87868' }} />
+            Sign Out
+          </button>
+        </div>
+      </aside>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="db-main">
         
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">
-            My Dashboard
-          </h1>
-          <p className="text-slate-500">
-            Submit help requests and track their status
-          </p>
-        </div>
+        <div className="db-header">
+          <div>
+            <h1 className = "db-heading">
+              Welcome back, {user.name?.split(' ')[0]}
+            </h1>
+            <p className="db-subheading">
+              Here's what's going on with your requests
+            </p>
+          </div>
 
         {/* Request Button */}
-        <div className="mb-8">
           <button
             onClick={() => setShowRequestForm(true)}
             className="btn-primary"
           >
-            + Submit New Request
+            + New Request
           </button>
         </div>
 
-        {/* Request Form Modal */}
-        {showRequestForm && (
-          <RequestFormModal
-            onClose={() => setShowRequestForm(false)}
-            onSuccess={() => {
-              setShowRequestForm(false)
-              loadRequests()
-            }}
-            userId={user.user_id}
-          />
+        {/* Cards Grid */}
+        {loading ? (
+          <p className="dashboard-loading">Loading...</p>
+        ) : requests.length === 0 ? (
+          <div className="dashboard-empty">
+            <h3 className="dashboard-empty-title">No requests yet</h3>
+            <p className="dashboard-empty-body">Submit your first help request to get started</p>
+            <button onClick={() => setShowRequestForm(true)} className="btn-primary">
+              Submit Request
+            </button>
+          </div>
+        ) : (
+          <div className="db-cards-grid">
+            {requests.map((request, i) => (
+              <RequestCard key={request.id} request={request} index={i} />
+            ))}
+          </div>
         )}
 
-        {/* Requests List */}
-        <div className="card">
-          <h2 className="text-xl font-semibold text-slate-900 mb-4">
-            My Requests
-          </h2>
+      </main>
 
-          {loading ? (
-            <div className="text-center py-8 text-slate-500">
-              Loading...
-            </div>
-          ) : requests.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-4xl mb-4">📝</div>
-              <h3 className="text-lg font-medium text-slate-900 mb-2">
-                No requests yet
-              </h3>
-              <p className="text-slate-500 mb-6">
-                Submit your first help request to get started
-              </p>
-              <button
-                onClick={() => setShowRequestForm(true)}
-                className="btn-primary"
-              >
-                Submit Request
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {requests.map((request) => (
-                <RequestCard key={request.id} request={request} />
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+      {showRequestForm && (
+        <RequestFormModal
+          onClose={() => setShowRequestForm(false)}
+          onSuccess={() => { setShowRequestForm(false); loadRequests() }}
+          userId={user.user_id}
+        />
+      )}
     </div>
   )
 }
 
 // Request Card Component
-function RequestCard({ request }) {
+function RequestCard({ request, index }) {
+  const accentColors = ['#3a3228', '#4a6a7a', '#6a6258', '#8a7a68', '#3a5a6a']
+  const accent = accentColors[index % accentColors.length]
   const getStatusBadge = (status) => {
     const badges = {
       pending: 'badge-pending',
@@ -177,35 +174,34 @@ function RequestCard({ request }) {
     : null
 
   return (
-    <div className="border border-gray-200 rounded-lg p-4 hover:border-primary-200 transition-colors">
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2 flex-wrap">
+    <div className="db-request-card">
+      <div className="db-request-card-accent" style={{ background: accent }} />
+        <div className="db-request-card-body">
+          <div className="db-request-card-badges">
             <span className={getStatusBadge(request.status)}>
               {getStatusText(request.status)}
             </span>
             <span className={getUrgencyBadge(request.urgency)}>
               {request.urgency}
             </span>
-            <span className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+            <span className="badge-completed" style={{ fontSize: '0.65rem' }}>
               {formatCategory(request.category)}
             </span>
           </div>
           
-          <p className="text-slate-700 mb-2">{request.description}</p>
+          <p className="request-description">{request.description}</p>
           
-          {request.address && (
-            <p className="text-sm text-slate-500">📍 {request.address}</p>
+          {request.address && ( 
+            <p className="request-location"> 📌 {request.address}</p>
           )}
 
           {/* Show helper info if accepted */}
           {request.status === 'in_progress' && acceptedHelper && (
             <AcceptedHelperInfo requestId={request.id} helperType={acceptedHelper.type} />
           )}
-        </div>
       </div>
       
-      <div className="text-xs text-slate-400">
+      <div className="request-meta" style={{ marginTop: '0.5rem' }}>
         Submitted {new Date(request.created_at).toLocaleDateString()}
       </div>
     </div>
@@ -234,8 +230,8 @@ function AcceptedHelperInfo({ requestId, helperType }) {
 
   if (loading) {
     return (
-      <div className="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3">
-        <p className="text-sm text-blue-700">Loading helper information...</p>
+      <div className="info-box" style={{ marginTop: '0.75rem' }}>
+        <p className="info-box-body">Loading helper information...</p>
       </div>
     );
   }
@@ -245,11 +241,11 @@ function AcceptedHelperInfo({ requestId, helperType }) {
   }
 
   return (
-    <div className="mt-3 bg-green-50 border border-green-200 rounded-lg p-3">
-      <h4 className="font-semibold text-green-800 mb-2 text-sm">
-        ✓ {helperType === 'volunteer' ? 'Volunteer' : 'Organization'} Accepted!
-      </h4>
-      <div className="text-sm text-green-700 space-y-1">
+    <div className="info-box" style={{ marginTop: '0.75rem' }}>
+      <p className="info-box-title">
+         {helperType === 'volunteer' ? 'Volunteer' : 'Organization'} Accepted!
+      </p>
+      <div className="info-box-body" style={{ listStyle: 'none' }}>
         <p><strong>Name:</strong> {helperInfo.name}</p>
         <p><strong>Email:</strong> {helperInfo.email}</p>
         {helperInfo.phone && (
@@ -297,22 +293,22 @@ function RequestFormModal({ onClose, onSuccess, userId }) {
   }
  
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
+    <div className="modal-overlay">
+      <div className="modal-box">
+        <div className="modal-inner">
 
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-slate-900">Submit Help Request</h2>
-            <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-2xl">×</button>
+          <div className="modal-header">
+            <h2 className="modal-title">Submit Help Request</h2>
+            <button onClick={onClose} className="modal-close">×</button>
           </div>
 
           {error && (
-            <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+            <div className="auth-error">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="auth-form">
 
             {/* Description */}
             <div>
@@ -320,18 +316,18 @@ function RequestFormModal({ onClose, onSuccess, userId }) {
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="input-field resize-none"
+                className="input-field"
                 rows="4"
                 placeholder="Example: I need help walking my golden retriever. He's friendly and loves people!"
                 required
               />
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="input-hint">
                 Our AI will automatically categorize your request and find the best helpers
               </p>
             </div>
 
             {/* Timing + Duration — side by side */}
-            <div className="grid grid-cols-2 gap-4">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               <div>
                 <label className="input-label">When do you need help?</label>
                 <select
@@ -361,7 +357,7 @@ function RequestFormModal({ onClose, onSuccess, userId }) {
             </div>
 
             {/* Physical help checkbox */}
-            <div className="flex items-center gap-3">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <input
                 type="checkbox"
                 id="physical_help"
@@ -384,34 +380,28 @@ function RequestFormModal({ onClose, onSuccess, userId }) {
                 className="input-field"
                 placeholder="123 Main St, Kansas City, MO"
               />
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="input-hint">
                 Helps us find volunteers nearby. We'll use Kansas City by default.
               </p>
             </div>
 
             {/* Info box */}
-            <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
-              <div className="flex gap-3">
-                <span className="text-2xl">ℹ️</span>
-                <div>
-                  <p className="text-sm font-medium text-blue-900 mb-1">What happens next?</p>
-                  <ol className="text-sm text-blue-700 space-y-1 list-decimal list-inside">
+            <div className="info-box">
+                  <p className="info-box-title">What happens next?</p>
+                  <ol className="info-box-body">
                     <li>We'll classify your request using AI</li>
                     <li>Find the best volunteers or organizations</li>
                     <li>Notify them about your request</li>
                     <li>You'll see updates on this dashboard</li>
                   </ol>
-                </div>
-              </div>
             </div>
 
-            <div className="flex gap-3">
-              <button type="button" onClick={onClose} className="btn-ghost flex-1">Cancel</button>
-              <button type="submit" disabled={loading} className="btn-primary flex-1">
+            <div className="modal-actions">
+              <button type="button" onClick={onClose} className="btn-ghost">Cancel</button>
+              <button type="submit" disabled={loading} className="btn-primary">
                 {loading ? 'Submitting...' : 'Submit Request'}
               </button>
             </div>
-
           </form>
         </div>
       </div>
