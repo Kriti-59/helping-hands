@@ -77,35 +77,88 @@ export default function UserRegister() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="auth-page">
+      <svg className="hero-corner-lines" viewBox="0 0 1440 800" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+          {/* Define gradient that fades at ends */}
+          <defs>
+            <linearGradient id="fadeTop" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#3a3228" stopOpacity="0"/>
+              <stop offset="15%" stopColor="#3a3228" stopOpacity="1"/>
+              <stop offset="85%" stopColor="#3a3228" stopOpacity="0"/>
+              <stop offset="100%" stopColor="#3a3228" stopOpacity="0"/>
+            </linearGradient>
+            <linearGradient id="fadeTopThin" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#6a6258" stopOpacity="0"/>
+              <stop offset="15%" stopColor="#6a6258" stopOpacity="1"/>
+              <stop offset="85%" stopColor="#6a6258" stopOpacity="1"/>
+              <stop offset="100%" stopColor="#6a6258" stopOpacity="0"/>
+            </linearGradient>
+            <linearGradient id="fadeBottom" x1="100%" y1="0%" x2="0%" y2="0%">
+              <stop offset="0%" stopColor="#4a6a7a" stopOpacity="0"/>
+              <stop offset="15%" stopColor="#4a6a7a" stopOpacity="1"/>
+              <stop offset="85%" stopColor="#4a6a7a" stopOpacity="1"/>
+              <stop offset="100%" stopColor="#4a6a7a" stopOpacity="0"/>
+            </linearGradient>
+            <linearGradient id="fadeBottomThin" x1="100%" y1="0%" x2="0%" y2="0%">
+              <stop offset="0%" stopColor="#304651" stopOpacity="0"/>
+              <stop offset="15%" stopColor="#304651" stopOpacity="1"/>
+              <stop offset="85%" stopColor="#304651" stopOpacity="1"/>
+              <stop offset="100%" stopColor="#304651" stopOpacity="0"/>
+            </linearGradient>
+          </defs>
+          {/* Top left — enters top, exits left */}
+          <path d="M0 350 C100 350 200 180 340 160 C480 140 560 240 700 220 C840 200 920 120 1060 100" 
+          fill="none" stroke="url(#fadeTop)" 
+          strokeWidth="16" 
+          strokeLinecap="round" 
+          opacity="0.22"
+          />
+          <path d="M-4.23 263.48  C83.5 285.91 227.39 124.36 368.81 124.04  C510.23 123.72 575.53 233.88 716.95 233.56 C858.37 233.24 948.73 165.15 1090.15 164.83" 
+          fill="none" 
+          stroke="url(#fadeTopThin)" 
+          strokeWidth="4" 
+          strokeLinecap="round" 
+          opacity="0.1"
+          />
+          {/* Bottom right — enters right, exits bottom */}
+          <path d="M1440 450 C1340 450 1240 620 1100 640 C960 660 880 560 740 580 C600 600 520 680 380 700" 
+          fill="none" 
+          stroke="url(#fadeBottom)" 
+          strokeWidth="16" 
+          strokeLinecap="round" 
+          opacity="0.25"
+          />
+          <path d="M1445.88 525.93 C1346.85 512.01 1214.26 665.05 1072.84 665.37 C931.42 665.69 866.12 555.53 724.7 555.85 C583.27 556.18 492.92 624.26 351.5 624.58"
+          fill="none" 
+          stroke="url(#fadeBottomThin)" 
+          strokeWidth="4" 
+          strokeLinecap="round" 
+          opacity="0.2"
+          />
+        </svg>
       
       {/* Header */}
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <Link to="/" className="flex items-center justify-center gap-2 mb-6">
-          <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-lg">H</span>
-          </div>
-          <span className="text-2xl font-bold text-slate-800">HelpHub</span>
+      <div className="auth-col">
+        <Link to="/" className="auth-logo">
+          <div className="auth-logo-icon"><span>H</span></div>
+          <span className="auth-logo-text">Helping Hands</span>
         </Link>
-        <h2 className="text-center text-3xl font-bold text-slate-900">
+        <h2 className="auth-heading">
           Create your account
         </h2>
-        <p className="mt-2 text-center text-sm text-slate-500">
+        <p className="auth-subheading">
           Get help from your community in minutes
         </p>
-      </div>
 
       {/* Form */}
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-sm sm:rounded-lg sm:px-10 border border-gray-100">
-          
-          {error && (
-            <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-              {error}
-            </div>
-          )}
+      <div className="auth-card">
+        {error && (
+          <div className="auth-error">
+            {error}
+          </div>
+        )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="auth-form">
             
             {/* Name */}
             <div>
@@ -180,7 +233,7 @@ export default function UserRegister() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full btn-primary"
+                className="btn-primary w-full"
               >
                 {loading ? 'Creating account...' : 'Create Account'}
               </button>
@@ -188,22 +241,21 @@ export default function UserRegister() {
           </form>
 
           {/* Divider */}
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200" />
+          <div className="auth-divider mt-6">
+            <div className="auth-divider-lin">
+              <div className="w-full border-t border-gray-200" />
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-slate-500">
+              <div className="auth-divider-text">
+                <span className="auth-divider-label">
                   Already have an account?
                 </span>
               </div>
             </div>
 
-            <div className="mt-6">
+            <div className="mt-4">
               <Link
                 to="/login"
-                className="w-full btn-outline block text-center"
+                className="btn-outline w-full block text-center"
               >
                 Sign In
               </Link>
@@ -211,14 +263,13 @@ export default function UserRegister() {
           </div>
 
           {/* Volunteer Link */}
-          <div className="mt-6 text-center">
+          <div className="auth-secondary-link">
             <p className="text-sm text-slate-500">
               Want to volunteer?{' '}
-              <Link to="/volunteer/register" className="text-primary-600 hover:text-primary-700 font-medium">
+              <Link to="/volunteer/register" className="auth-link">
                 Register as a volunteer
               </Link>
             </p>
-          </div>
         </div>
       </div>
     </div>
