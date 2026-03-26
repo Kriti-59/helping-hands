@@ -58,10 +58,12 @@ export const requestAPI = {
     const params = helperId ? { helper_id: helperId } : {};
     return api.get(`/api/requests/${requestId}`, { params });
   },
-  updateStatus: (requestId, status) =>
-    api.patch(`/api/requests/${requestId}/status`, null, {
-      params: { new_status: status },
-    }),
+
+  update: (requestId, data) => 
+    api.put(`/api/requests/${requestId}`, data),
+  
+  updateStatus: (requestId, status) => 
+    api.patch(`/api/requests/${requestId}/status`, { status }),
 };
 
 // ============================================

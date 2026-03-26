@@ -4,8 +4,8 @@ from typing import List, Optional
 import uuid
 
 from ..database import get_db
-from ..models import Request, User
-from ..schemas import RequestCreate, RequestResponse, RequestPublicResponse, RequestPrivateResponse
+from ..models import Request, User, Match
+from ..schemas import RequestCreate, RequestResponse, RequestPublicResponse, RequestPrivateResponse, StatusUpdate
 from ..services.ai_service import classify_request
 from ..services.embedding_service import generate_request_embedding
 from ..services.matching_service import find_matches_semantic
@@ -133,25 +133,80 @@ async def get_request(
 
 @router.patch("/{request_id}/status")
 async def update_request_status(
-    request_id: uuid.UUID,
-    new_status: str,
+    request_id: str,
+    status_update: StatusUpdate,
     db: Session = Depends(get_db)
 ):
-    """Update request status"""
-    valid_statuses = ['pending', 'matched', 'in_progress', 'completed', 'cancelled', 'no_matches']
+    """Update request status (complete/cancel)."""
+    try:
+        request_uuid = uuid.UUID(request_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid request ID")
     
-    if new_status not in valid_statuses:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid status. Must be one of: {valid_statuses}"
-        )
-    
-    request = db.query(Request).filter(Request.id == request_id).first()
+    request = db.query(Request).filter(Request.id == request_uuid).first()
     if not request:
         raise HTTPException(status_code=404, detail="Request not found")
     
-    request.status = new_status
+    if status_update.status not in ["completed", "cancelled"]:
+        raise HTTPException(status_code=400, detail="Invalid status")
+    
+    # Validate allowed transitions
+    cancellable = ["pending", "matched", "no_matches"]
+    completable = ["in_progress"]
+    
+    if status_update.status == "cancelled" and request.status not in cancellable:
+        raise HTTPException(status_code=400, detail=f"Cannot cancel a request with status '{request.status}'")
+    
+    if status_update.status == "completed" and request.status not in completable:
+        raise HTTPException(status_code=400, detail="Can only complete a request that is in progress")
+    
+    request.status = status_update.status
     db.commit()
     db.refresh(request)
     
-    return {"message": "Status updated", "request": request}
+    return request
+
+
+@router.put("/{request_id}", response_model=RequestResponse)
+async def update_request(
+    request_id: str,
+    request_data: RequestCreate,
+    db: Session = Depends(get_db)
+):
+    """Update an existing request and re-run matching."""
+    try:
+        request_uuid = uuid.UUID(request_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid request ID")
+    
+    request = db.query(Request).filter(Request.id == request_uuid).first()
+    if not request:
+        raise HTTPException(status_code=404, detail="Request not found")
+    
+    classification = classify_request(request_data.description)
+    request_embedding = generate_request_embedding(
+        request_data.description,
+        classification["category"]
+    )
+    
+    request.description = request_data.description
+    request.address = request_data.address
+    request.category = classification["category"]
+    request.routing_type = classification["routing_type"]
+    request.urgency = classification["urgency"]
+    request.description_embedding = request_embedding
+    
+    db.commit()
+    
+    db.query(Match).filter(Match.request_id == request_uuid).delete()
+    
+    matches = find_matches_semantic(request, db)
+    for match in matches:
+        db.add(match)
+    
+    request.status = "matched" if matches else "no_matches"
+    
+    db.commit()
+    db.refresh(request)
+    
+    return request

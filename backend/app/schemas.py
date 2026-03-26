@@ -326,3 +326,6 @@ class MatchResponse(BaseModel):
     
     class Config:
         from_attributes = True
+
+class StatusUpdate(BaseModel):
+    status: str
