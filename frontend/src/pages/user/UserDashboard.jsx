@@ -104,7 +104,12 @@ export default function UserDashboard() {
         ) : (
           <div className="db-cards-grid">
             {requests.map((request, i) => (
-              <RequestCard key={request.id} request={request} index={i} />
+              <RequestCard 
+                key={request.id} 
+                request={request} 
+                index={i}
+                onUpdate={loadRequests}
+              />
             ))}
           </div>
         )}
@@ -119,13 +124,18 @@ export default function UserDashboard() {
         />
       )}
     </div>
-  )
+  );
 }
 
-// Request Card Component
-function RequestCard({ request, index }) {
+// Request Card Component with Actions
+function RequestCard({ request, index, onUpdate }) {
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [showCancelModal, setShowCancelModal] = useState(false)
+  const [actionLoading, setActionLoading] = useState(false)
+
   const accentColors = ['#3a3228', '#4a6a7a', '#6a6258', '#8a7a68', '#3a5a6a']
   const accent = accentColors[index % accentColors.length]
+  
   const getStatusBadge = (status) => {
     const badges = {
       pending: 'badge-pending',
@@ -166,16 +176,55 @@ function RequestCard({ request, index }) {
       .join(' ')
   }
 
-  // Determine which helper accepted (if any)
   const acceptedHelper = request.accepted_by_volunteer_id 
     ? { type: 'volunteer', id: request.accepted_by_volunteer_id }
     : request.accepted_by_organization_id
     ? { type: 'organization', id: request.accepted_by_organization_id }
     : null
 
+  // Mark as Complete
+  const handleMarkComplete = async () => {
+    if (!window.confirm('Mark this request as completed?')) return
+    
+    setActionLoading(true)
+    try {
+      await requestAPI.updateStatus(request.id, 'completed')
+      onUpdate()
+    } catch (error) {
+      console.error('Error marking complete:', error)
+      alert('Failed to mark request as completed')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  // Cancel Request
+  const handleCancel = async () => {
+    setShowCancelModal(false)
+    setActionLoading(true)
+    try {
+      await requestAPI.updateStatus(request.id, 'cancelled')
+      onUpdate()
+    } catch (error) {
+      console.error('Error cancelling request:', error)
+      alert('Failed to cancel request')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  // Determine available actions based on status
+  const canEdit = ['pending', 'matched', 'no_matches'].includes(request.status)
+  const canCancel = !['completed', 'cancelled'].includes(request.status)
+  const canComplete = request.status === 'in_progress'
+
   return (
-    <div className="db-request-card">
-      <div className="db-request-card-accent" style={{ background: accent }} />
+    <>
+      <div className="db-request-card">
+        <div
+          className="db-request-card-accent"
+          style={{ background: accent }}
+        />
         <div className="db-request-card-body">
           <div className="db-request-card-badges">
             <span className={getStatusBadge(request.status)}>
@@ -184,28 +233,92 @@ function RequestCard({ request, index }) {
             <span className={getUrgencyBadge(request.urgency)}>
               {request.urgency}
             </span>
-            <span className="badge-completed" style={{ fontSize: '0.65rem' }}>
+            <span className="badge-completed" style={{ fontSize: "0.65rem" }}>
               {formatCategory(request.category)}
             </span>
           </div>
-          
+
           <p className="request-description">{request.description}</p>
-          
-          {request.address && ( 
-            <p className="request-location"> 📌 {request.address}</p>
+
+          {request.address && (
+            <p className="request-location">📌 {request.address}</p>
           )}
 
           {/* Show helper info if accepted */}
-          {request.status === 'in_progress' && acceptedHelper && (
-            <AcceptedHelperInfo requestId={request.id} helperType={acceptedHelper.type} />
+          {request.status === "in_progress" && acceptedHelper && (
+            <AcceptedHelperInfo
+              requestId={request.id}
+              helperType={acceptedHelper.type}
+            />
           )}
+        </div>
+
+        <div className="request-meta" style={{ marginTop: "0.75rem" }}>
+          <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>
+            Submitted {new Date(request.created_at).toLocaleDateString()}
+          </span>
+
+          {/* Action Buttons */}
+          <div
+            style={{
+              display: "flex",
+              gap: "0.5rem",
+              marginTop: "0.5rem",
+              flexWrap: "wrap",
+            }}
+          >
+            {canComplete && (
+              <button
+                onClick={handleMarkComplete}
+                disabled={actionLoading}
+                className="text-xs px-3 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 rounded-md font-medium transition-colors disabled:opacity-50"
+              >
+                ✓ Complete
+              </button>
+            )}
+            {canEdit && (
+              <button
+                onClick={() => setShowEditModal(true)}
+                disabled={actionLoading}
+                className="text-xs px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-md font-medium transition-colors disabled:opacity-50"
+              >
+                ✏️ Edit
+              </button>
+            )}
+            {canCancel && (
+              <button
+                onClick={() => setShowCancelModal(true)}
+                disabled={actionLoading}
+                className="text-xs px-3 py-1.5 bg-red-50 text-red-700 hover:bg-red-100 rounded-md font-medium transition-colors disabled:opacity-50"
+              >
+                ✕ Cancel
+              </button>
+            )}
+          </div>
+        </div>
       </div>
-      
-      <div className="request-meta" style={{ marginTop: '0.5rem' }}>
-        Submitted {new Date(request.created_at).toLocaleDateString()}
-      </div>
-    </div>
-  )
+
+      {/* Edit Modal */}
+      {showEditModal && (
+        <EditRequestModal
+          request={request}
+          onClose={() => setShowEditModal(false)}
+          onSuccess={() => {
+            setShowEditModal(false);
+            onUpdate();
+          }}
+        />
+      )}
+
+      {/* Cancel Confirmation Modal */}
+      {showCancelModal && (
+        <ConfirmCancelModal
+          onConfirm={handleCancel}
+          onCancel={() => setShowCancelModal(false)}
+        />
+      )}
+    </>
+  );
 }
 
 // Accepted Helper Info Component
@@ -256,6 +369,129 @@ function AcceptedHelperInfo({ requestId, helperType }) {
   );
 }
 
+// Cancel Confirmation Modal
+function ConfirmCancelModal({ onConfirm, onCancel }) {
+  return (
+    <div className="modal-overlay">
+      <div className="bg-white rounded-xl max-w-md w-full p-6">
+        <h3 className="text-xl font-bold text-slate-900 mb-3">
+          Cancel Request?
+        </h3>
+        <p className="text-slate-600 mb-6">
+          Are you sure you want to cancel this request? This action cannot be undone. If a volunteer has already accepted, they will be notified.
+        </p>
+        <div className="flex gap-3">
+          <button
+            onClick={onCancel}
+            className="btn-ghost flex-1"
+          >
+            Keep Request
+          </button>
+          <button
+            onClick={onConfirm}
+            className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
+          >
+            Yes, Cancel Request
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Edit Request Modal
+function EditRequestModal({ request, onClose, onSuccess }) {
+  const [formData, setFormData] = useState({
+    description: request.description,
+    address: request.address || '',
+  })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+ 
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+ 
+    if (!formData.description.trim()) {
+      setError('Please describe what you need help with')
+      return
+    }
+ 
+    setLoading(true)
+ 
+    try {
+      await requestAPI.update(request.id, formData)
+      onSuccess()
+    } catch (err) {
+      console.error('Error updating request:', err)
+      setError('Failed to update request. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+ 
+  return (
+    <div className="modal-overlay">
+      <div className="modal-box">
+        <div className="modal-inner">
+
+          <div className="modal-header">
+            <h2 className="modal-title">Edit Request</h2>
+            <button onClick={onClose} className="modal-close">×</button>
+          </div>
+
+          {error && (
+            <div className="auth-error">
+              {error}
+            </div>
+          )}
+
+          {/* Info */}
+          <div className="info-box" style={{ marginBottom: '1.5rem' }}>
+            <p className="info-box-body">
+              <strong>Note:</strong> Editing your request will re-run AI matching to find the best helpers for your updated needs.
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="auth-form">
+
+            {/* Description */}
+            <div>
+              <label className="input-label">What do you need help with? *</label>
+              <textarea
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                className="input-field"
+                rows="4"
+                required
+              />
+            </div>
+
+            {/* Location */}
+            <div>
+              <label className="input-label">Location</label>
+              <input
+                type="text"
+                value={formData.address}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                className="input-field"
+                placeholder="123 Main St, Kansas City, MO"
+              />
+            </div>
+
+            <div className="modal-actions">
+              <button type="button" onClick={onClose} className="btn-ghost">Cancel</button>
+              <button type="submit" disabled={loading} className="btn-primary">
+                {loading ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // Request Form Modal Component
 function RequestFormModal({ onClose, onSuccess, userId }) {
   const [formData, setFormData] = useState({
@@ -263,9 +499,6 @@ function RequestFormModal({ onClose, onSuccess, userId }) {
     address: '',
     latitude: 39.0997,
     longitude: -94.5786,
-    timing: 'flexible',
-    duration: '',
-    physical_help: false,
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -324,50 +557,6 @@ function RequestFormModal({ onClose, onSuccess, userId }) {
               <p className="input-hint">
                 Our AI will automatically categorize your request and find the best helpers
               </p>
-            </div>
-
-            {/* Timing + Duration — side by side */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <div>
-                <label className="input-label">When do you need help?</label>
-                <select
-                  value={formData.timing}
-                  onChange={(e) => setFormData({ ...formData, timing: e.target.value })}
-                  className="input-field"
-                >
-                  <option value="today">Today</option>
-                  <option value="this_week">This week</option>
-                  <option value="flexible">Flexible</option>
-                </select>
-              </div>
-              <div>
-                <label className="input-label">How long will it take?</label>
-                <select
-                  value={formData.duration}
-                  onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                  className="input-field"
-                >
-                  <option value="">Not sure</option>
-                  <option value="under_1hr">Under 1 hour</option>
-                  <option value="1_2hrs">1–2 hours</option>
-                  <option value="half_day">Half day (3–4 hrs)</option>
-                  <option value="full_day">Full day</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Physical help checkbox */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <input
-                type="checkbox"
-                id="physical_help"
-                checked={formData.physical_help}
-                onChange={(e) => setFormData({ ...formData, physical_help: e.target.checked })}
-                className="w-4 h-4 rounded border-gray-300 text-primary-600"
-              />
-              <label htmlFor="physical_help" className="text-sm text-slate-700">
-                This task requires physical help (heavy lifting, moving, etc.)
-              </label>
             </div>
 
             {/* Location */}
