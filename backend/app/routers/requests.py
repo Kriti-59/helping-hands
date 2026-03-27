@@ -131,7 +131,7 @@ async def get_request(
     else:
         return RequestPublicResponse.from_orm(request)
 
-@router.patch("/{request_id}/status")
+@router.patch("/{request_id}/status", response_model=RequestResponse)
 async def update_request_status(
     request_id: str,
     status_update: StatusUpdate,
@@ -151,7 +151,7 @@ async def update_request_status(
         raise HTTPException(status_code=400, detail="Invalid status")
     
     # Validate allowed transitions
-    cancellable = ["pending", "matched", "no_matches"]
+    cancellable = ["pending", "matched", "no_matches", "in_progress"]
     completable = ["in_progress"]
     
     if status_update.status == "cancelled" and request.status not in cancellable:
@@ -164,24 +164,34 @@ async def update_request_status(
     db.commit()
     db.refresh(request)
     
-    return request
-
+    return RequestResponse.from_orm(request)
 
 @router.put("/{request_id}", response_model=RequestResponse)
 async def update_request(
     request_id: str,
     request_data: RequestCreate,
+    user_id: str,
     db: Session = Depends(get_db)
 ):
     """Update an existing request and re-run matching."""
     try:
         request_uuid = uuid.UUID(request_id)
+        user_uuid = uuid.UUID(user_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid request ID")
+        raise HTTPException(status_code=400, detail="Invalid request ID or user ID format")
     
     request = db.query(Request).filter(Request.id == request_uuid).first()
     if not request:
         raise HTTPException(status_code=404, detail="Request not found")
+    
+    # Validate user ownership
+    if request.user_id != user_uuid:
+        raise HTTPException(status_code=403, detail="You do not have permission to edit this request")
+    
+    # Validate request status allows editing
+    editable_statuses = ["pending", "matched", "no_matches"]
+    if request.status not in editable_statuses:
+        raise HTTPException(status_code=400, detail=f"Cannot edit a request with status '{request.status}'. Requests can only be edited before a helper accepts.")
     
     classification = classify_request(request_data.description)
     request_embedding = generate_request_embedding(
@@ -209,4 +219,4 @@ async def update_request(
     db.commit()
     db.refresh(request)
     
-    return request
+    return RequestResponse.from_orm(request)

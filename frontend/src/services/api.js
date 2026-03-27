@@ -59,8 +59,8 @@ export const requestAPI = {
     return api.get(`/api/requests/${requestId}`, { params });
   },
 
-  update: (requestId, data) => 
-    api.put(`/api/requests/${requestId}`, data),
+  update: (requestId, data, userId) => 
+    api.put(`/api/requests/${requestId}?user_id=${userId}`, data),
   
   updateStatus: (requestId, status) => 
     api.patch(`/api/requests/${requestId}/status`, { status }),

@@ -9,6 +9,7 @@ export default function UserDashboard() {
   const [requests, setRequests] = useState([])
   const [loading, setLoading] = useState(true)
   const [showRequestForm, setShowRequestForm] = useState(false)
+  const [viewMode, setViewMode] = useState('active') // 'active' or 'history'
 
   useEffect(() => {
     loadRequests()
@@ -24,6 +25,15 @@ export default function UserDashboard() {
       setLoading(false)
     }
   }
+
+  // Filter requests based on view mode
+  const filteredRequests = requests.filter(req => {
+    if (viewMode === 'active') {
+      return ['pending', 'matched', 'no_matches', 'in_progress'].includes(req.status)
+    } else {
+      return ['completed', 'cancelled'].includes(req.status)
+    }
+  })
 
   const handleLogout = () => {
     logout()
@@ -41,7 +51,10 @@ export default function UserDashboard() {
         </div>
 
         <nav className="db-sidebar-nav">
-          <button className="db-sidebar-link db-sidebar-link--active">
+          <button 
+            className={`db-sidebar-link ${viewMode === 'active' ? 'db-sidebar-link--active' : ''}`}
+            onClick={() => setViewMode('active')}
+          >
             <div className="db-sidebar-dot" style={{ background: '#c8b8a0' }} />
             My Requests
           </button>
@@ -49,7 +62,10 @@ export default function UserDashboard() {
             <div className="db-sidebar-dot" style={{ background: '#a0b880' }} />
             New Request
           </button>
-          <button className="db-sidebar-link">
+          <button 
+            className={`db-sidebar-link ${viewMode === 'history' ? 'db-sidebar-link--active' : ''}`}
+            onClick={() => setViewMode('history')}
+          >
             <div className="db-sidebar-dot" style={{ background: '#7a9aaa' }} />
             History
           </button>
@@ -74,41 +90,59 @@ export default function UserDashboard() {
         <div className="db-header">
           <div>
             <h1 className = "db-heading">
-              Welcome back, {user.name?.split(' ')[0]}
+              {viewMode === 'active' 
+                ? `Welcome back, ${user.name?.split(' ')[0]}`
+                : 'Request History'
+              }
             </h1>
             <p className="db-subheading">
-              Here's what's going on with your requests
+              {viewMode === 'active'
+                ? "Here's what's going on with your requests"
+                : "Your completed and cancelled requests"
+              }
             </p>
           </div>
 
         {/* Request Button */}
-          <button
-            onClick={() => setShowRequestForm(true)}
-            className="btn-primary"
-          >
-            + New Request
-          </button>
+          {viewMode === 'active' && (
+            <button
+              onClick={() => setShowRequestForm(true)}
+              className="btn-primary"
+            >
+              + New Request
+            </button>
+          )}
         </div>
 
         {/* Cards Grid */}
         {loading ? (
           <p className="dashboard-loading">Loading...</p>
-        ) : requests.length === 0 ? (
+        ) : filteredRequests.length === 0 ? (
           <div className="dashboard-empty">
-            <h3 className="dashboard-empty-title">No requests yet</h3>
-            <p className="dashboard-empty-body">Submit your first help request to get started</p>
-            <button onClick={() => setShowRequestForm(true)} className="btn-primary">
-              Submit Request
-            </button>
+            <h3 className="dashboard-empty-title">
+              {viewMode === 'active' ? 'No active requests' : 'No history yet'}
+            </h3>
+            <p className="dashboard-empty-body">
+              {viewMode === 'active' 
+                ? 'Submit your first help request to get started'
+                : 'Your completed and cancelled requests will appear here'
+              }
+            </p>
+            {viewMode === 'active' && (
+              <button onClick={() => setShowRequestForm(true)} className="btn-primary">
+                Submit Request
+              </button>
+            )}
           </div>
         ) : (
           <div className="db-cards-grid">
-            {requests.map((request, i) => (
+            {filteredRequests.map((request, i) => (
               <RequestCard 
                 key={request.id} 
                 request={request} 
                 index={i}
                 onUpdate={loadRequests}
+                userId={user.user_id}
               />
             ))}
           </div>
@@ -128,7 +162,7 @@ export default function UserDashboard() {
 }
 
 // Request Card Component with Actions
-function RequestCard({ request, index, onUpdate }) {
+function RequestCard({ request, index, onUpdate, userId }) {
   const [showEditModal, setShowEditModal] = useState(false)
   const [showCancelModal, setShowCancelModal] = useState(false)
   const [actionLoading, setActionLoading] = useState(false)
@@ -307,6 +341,7 @@ function RequestCard({ request, index, onUpdate }) {
             setShowEditModal(false);
             onUpdate();
           }}
+          userId={userId}
         />
       )}
 
@@ -400,7 +435,7 @@ function ConfirmCancelModal({ onConfirm, onCancel }) {
 }
 
 // Edit Request Modal
-function EditRequestModal({ request, onClose, onSuccess }) {
+function EditRequestModal({ request, onClose, onSuccess, userId }) {
   const [formData, setFormData] = useState({
     description: request.description,
     address: request.address || '',
@@ -420,11 +455,19 @@ function EditRequestModal({ request, onClose, onSuccess }) {
     setLoading(true)
  
     try {
-      await requestAPI.update(request.id, formData)
+      await requestAPI.update(request.id, formData, userId)
       onSuccess()
     } catch (err) {
       console.error('Error updating request:', err)
-      setError('Failed to update request. Please try again.')
+      
+      // Handle specific error responses
+      if (err.response?.status === 403) {
+        setError('You do not have permission to edit this request.')
+      } else if (err.response?.status === 400) {
+        setError(err.response?.data?.detail || 'Cannot edit this request. It may have already been matched or completed.')
+      } else {
+        setError('Failed to update request. Please try again.')
+      }
     } finally {
       setLoading(false)
     }
