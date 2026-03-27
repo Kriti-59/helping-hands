@@ -252,27 +252,43 @@ function RequestCard({ request, index, onUpdate, userId }) {
   const canCancel = !['completed', 'cancelled'].includes(request.status)
   const canComplete = request.status === 'in_progress'
 
+  const dotColor =
+  request.status === 'in_progress' ? '#4a6a7a' :  // teal — filled
+  request.status === 'matched'     ? '#4a6a7a' :  // teal — filled
+  request.status === 'completed'   ? '#6a6258' :  // muted brown — filled
+  request.status === 'cancelled'   ? '#d8c8b0' :  // light — empty
+  request.status === 'no_matches'  ? '#d8c8b0' :  // light — empty
+                                     '#8a7a68'    // pending — half
+
+const dotFilled =
+  ['in_progress', 'matched', 'completed'].includes(request.status)
+
   return (
     <>
-      <div className="db-request-card">
-        <div
-          className="db-request-card-accent"
-          style={{ background: accent }}
-        />
-        <div className="db-request-card-body">
-          <div className="db-request-card-badges">
+      <div className="tl-row">
+        <div className="tl-rail">
+          <div className="tl-dot" style={{ borderColor: dotColor }}>
+            <div style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              background: dotFilled ? dotColor : 'transparent'
+            }} />
+          </div>
+        </div>
+        <div className="tl-card">
+          <div className="tl-card-top">
             <span className={getStatusBadge(request.status)}>
               {getStatusText(request.status)}
             </span>
-            <span className={getUrgencyBadge(request.urgency)}>
-              {request.urgency}
-            </span>
-            <span className="badge-completed" style={{ fontSize: "0.65rem" }}>
+            <span className="tl-card-meta">
+              {new Date(request.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              {' · '}
               {formatCategory(request.category)}
             </span>
           </div>
 
-          <p className="request-description">{request.description}</p>
+          <p className="tl-card-desc">{request.description}</p>
 
           {request.address && (
             <p className="request-location">📌 {request.address}</p>
@@ -285,52 +301,34 @@ function RequestCard({ request, index, onUpdate, userId }) {
               helperType={acceptedHelper.type}
             />
           )}
-        </div>
 
-        <div className="request-meta" style={{ marginTop: "0.75rem" }}>
-          <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>
-            Submitted {new Date(request.created_at).toLocaleDateString()}
-          </span>
-
-          {/* Action Buttons */}
-          <div
-            style={{
-              display: "flex",
-              gap: "0.5rem",
-              marginTop: "0.5rem",
-              flexWrap: "wrap",
-            }}
-          >
-            {canComplete && (
-              <button
-                onClick={handleMarkComplete}
-                disabled={actionLoading}
-                className="text-xs px-3 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 rounded-md font-medium transition-colors disabled:opacity-50"
-              >
-                ✓ Complete
-              </button>
-            )}
-            {canEdit && (
-              <button
-                onClick={() => setShowEditModal(true)}
-                disabled={actionLoading}
-                className="text-xs px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-md font-medium transition-colors disabled:opacity-50"
-              >
-                ✏️ Edit
-              </button>
-            )}
-            {canCancel && (
-              <button
-                onClick={() => setShowCancelModal(true)}
-                disabled={actionLoading}
-                className="text-xs px-3 py-1.5 bg-red-50 text-red-700 hover:bg-red-100 rounded-md font-medium transition-colors disabled:opacity-50"
-              >
-                ✕ Cancel
-              </button>
-            )}
-          </div>
+        <div className="tl-card-actions">
+          {canComplete && (
+            <button onClick={handleMarkComplete} disabled={actionLoading} className="tl-action-btn tl-action-btn--green">
+              ✓ Complete
+            </button>
+          )}
+          {canEdit && (
+            <button
+              onClick={() => setShowEditModal(true)}
+              disabled={actionLoading}
+              className="tl-action-btn tl-action-btn--blue"
+            >
+              Edit
+            </button>
+          )}
+          {canCancel && (
+            <button
+              onClick={() => setShowCancelModal(true)}
+              disabled={actionLoading}
+              className="tl-action-btn tl-action-btn--red"
+            >
+              Cancel
+            </button>
+          )}
         </div>
       </div>
+    </div>
 
       {/* Edit Modal */}
       {showEditModal && (
@@ -389,16 +387,17 @@ function AcceptedHelperInfo({ requestId, helperType }) {
   }
 
   return (
-    <div className="info-box" style={{ marginTop: '0.75rem' }}>
-      <p className="info-box-title">
-         {helperType === 'volunteer' ? 'Volunteer' : 'Organization'} Accepted!
-      </p>
-      <div className="info-box-body" style={{ listStyle: 'none' }}>
-        <p><strong>Name:</strong> {helperInfo.name}</p>
-        <p><strong>Email:</strong> {helperInfo.email}</p>
-        {helperInfo.phone && (
-          <p><strong>Phone:</strong> {helperInfo.phone}</p>
-        )}
+    <div className="tl-helper-box">
+      <div className="tl-helper-avatar">
+        {helperInfo.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+      </div>
+      <div>
+        <p className="tl-helper-name">
+          {helperInfo.name} — {helperType === 'volunteer' ? 'Volunteer' : 'Organization'}
+        </p>
+        <p className="tl-helper-contact">
+          {helperInfo.email}{helperInfo.phone ? ` · ${helperInfo.phone}` : ''}
+        </p>
       </div>
     </div>
   );
@@ -408,26 +407,28 @@ function AcceptedHelperInfo({ requestId, helperType }) {
 function ConfirmCancelModal({ onConfirm, onCancel }) {
   return (
     <div className="modal-overlay">
-      <div className="bg-white rounded-xl max-w-md w-full p-6">
-        <h3 className="text-xl font-bold text-slate-900 mb-3">
-          Cancel Request?
-        </h3>
-        <p className="text-slate-600 mb-6">
+      <div className="modal-box" style={{ maxWidth: '28rem' }}>
+        <div className="modal-inner">
+          <h3 className="modal-title">
+            Cancel Request?
+          </h3>
+          <p style={{ fontSize: '0.875rem', color: '#6a6258', margin: '0.75rem 0 1.5rem' }}>
           Are you sure you want to cancel this request? This action cannot be undone. If a volunteer has already accepted, they will be notified.
-        </p>
-        <div className="flex gap-3">
-          <button
-            onClick={onCancel}
-            className="btn-ghost flex-1"
-          >
-            Keep Request
-          </button>
-          <button
-            onClick={onConfirm}
-            className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
-          >
-            Yes, Cancel Request
-          </button>
+          </p>
+          <div className="modal-actions">
+            <button
+              onClick={onCancel}
+              className="btn-ghost flex-1"
+            >
+              Keep Request
+            </button>
+            <button
+              onClick={onConfirm}
+              className="btn-danger"
+            >
+              Yes, Cancel Request
+            </button>
+          </div>
         </div>
       </div>
     </div>

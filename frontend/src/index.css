@@ -73,7 +73,7 @@ body {
     @apply px-4 py-2 rounded-full font-semibold text-sm
            active:scale-95 transition-all duration-150;
     color: #3a3228;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', sans-serif;   
   }
 
   .btn-ghost:hover { background-color: #e8e0d4; }
@@ -82,7 +82,7 @@ body {
     @apply bg-red-600 text-white px-5 py-2 rounded-xl font-semibold text-sm
            hover:bg-red-700 active:scale-95 transition-all duration-150
            focus:outline-none focus:ring-4 focus:ring-red-300 focus:ring-offset-2
-           disabled:opacity-40 disabled:cursor-not-allowed;
+           disabled:opacity-50 disabled:cursor-not-allowed;
     font-family: 'Inter', sans-serif;
   }
 
@@ -447,13 +447,6 @@ body {
     color: #f0ece4;
   }
 
-  .db-sidebar-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
   .db-sidebar-bottom {
     border-top: 1px solid rgba(200, 184, 160, 0.15);
     padding-top: 0.75rem;
@@ -517,48 +510,171 @@ body {
     color: #6a6258;
     margin: 0.25rem 0 0;
   }
-
-  .db-cards-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1rem;
+  .tl-feed {
+    display: flex;
+    flex-direction: column;
   }
 
-  .db-request-card {
+  .tl-row {
+    display: flex;
+    gap: 0;
+    position: relative;
+    align-items: stretch;
+  }
+
+  .tl-rail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 40px;
+    flex-shrink: 0;
+    padding-top: 1.25rem;
+    align-self: stretch; 
+  }
+
+  .tl-dot {
+    width: 16px;
+    height:16px;
+    border-radius: 50%;
+    border: 2px solid #8a7a68;
+    background: white;
+    flex-shrink: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tl-rail::after {
+    content: '';
+    flex: 1;
+    width: 1.5px;
+    background: #d8c8b0;
+    margin-top: 6px;
+    min-height: 20px;
+  }
+
+  .tl-row:last-child .tl-rail::after {
+    display: none;
+  }
+
+  .tl-card {
+    flex: 1;
     background: white;
     border-radius: 12px;
     border: 1px solid #d8c8b0;
+    padding: 1rem 1.25rem;
+    margin: 0.5rem 0 1rem;
     display: flex;
-    overflow: hidden;
-    transform: perspective(800px) rotateX(2deg);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: 0 4px 0 #c8b8a0;
+    flex-direction: column;
+    gap: 0.5rem;
+    transition: border-color 0.15s;
+  }
+
+  .tl-card:hover { border-color: #a89880; }
+
+  .tl-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .tl-card-meta {
+    font-size: 0.75rem;
+    color: #8a7a68;
+    white-space: nowrap;
+  }
+
+  .tl-card-desc {
+    font-size: 0.9rem;
+    color: #2a2418;
+    line-height: 1.5;
+  }
+
+  .tl-card-hint {
+    font-size: 0.8rem;
+    color: #8a7a68;
+    font-style: italic;
+  }
+
+  .tl-card-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.25rem;
+  }
+
+  .tl-action-btn {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: none;
     cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: opacity 0.15s;
   }
 
-  .db-request-card:hover {
-    transform: perspective(800px) rotateX(0deg) translateY(-3px);
-    box-shadow: 0 8px 0 #b8a890;
+  .tl-action-btn:disabled { opacity: 0.4; }
+
+  .tl-action-btn--green {
+    background-color: #e4eed8;
+    color: #3a6020;
   }
 
-  .db-request-card-accent {
-    width: 5px;
+  .tl-action-btn--green:hover { background-color: #d4e0c8; }
+
+  .tl-action-btn--blue {
+    background-color: #dce8f0;
+    color: #3a5a6a;
+  }
+
+  .tl-action-btn--blue:hover { background-color: #ccd8e0; }
+
+  .tl-action-btn--red {
+    background-color: #f0e0dc;
+    color: #6a2818;
+  }
+
+  .tl-action-btn--red:hover { background-color: #e0d0cc; }
+
+  .tl-helper-box {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background-color: #e8f0e4;
+    border: 1px solid #b8d4b0;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin-top: 0.25rem;
+  }
+
+  .tl-helper-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #6a9870;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
     flex-shrink: 0;
   }
 
-  .db-request-card-body {
-    flex: 1;
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
+  .tl-helper-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #2a5020;
   }
 
-  .db-request-card-badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    margin-bottom: 0.25rem;
+  .tl-helper-contact {
+    font-size: 0.78rem;
+    color: #4a7040;
+    margin-top: 1px;
   }
   /* ─────────────────────────────────────────
      MODAL
