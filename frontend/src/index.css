@@ -378,12 +378,15 @@ body {
 
   .db-sidebar {
     width: 200px;
-    min-height: 100vh;
+    height: 100vh;
+    position: sticky;
+    top:0;
     background-color: #2a2418;
     display: flex;
     flex-direction: column;
     padding: 1.25rem 0.875rem;
     flex-shrink: 0;
+    overflow-y: auto;
   }
 
   .db-sidebar-logo {
@@ -488,6 +491,7 @@ body {
     flex-direction: column;
     gap: 1.5rem;
     overflow-y: auto;
+    height: 100vh;
   }
 
   .db-header {
