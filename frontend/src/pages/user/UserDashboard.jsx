@@ -135,7 +135,7 @@ export default function UserDashboard() {
             )}
           </div>
         ) : (
-          <div className="db-cards-grid">
+          <div className="tl-feed">
             {filteredRequests.map((request, i) => (
               <RequestCard 
                 key={request.id} 
@@ -166,6 +166,7 @@ function RequestCard({ request, index, onUpdate, userId }) {
   const [showEditModal, setShowEditModal] = useState(false)
   const [showCancelModal, setShowCancelModal] = useState(false)
   const [actionLoading, setActionLoading] = useState(false)
+  const [showDetails, setShowDetails] = useState(false)
 
   const accentColors = ['#3a3228', '#4a6a7a', '#6a6258', '#8a7a68', '#3a5a6a']
   const accent = accentColors[index % accentColors.length]
@@ -290,25 +291,37 @@ const dotFilled =
 
           <p className="tl-card-desc">{request.description}</p>
 
-          {request.address && (
-            <p className="request-location">📌 {request.address}</p>
+
+          {/* Toggle details */}
+          {(request.estimated_duration || request.requires_heavy_lifting || request.accessibility_requirements || request.flexibility_level === 'strict') && (
+            <button
+              onClick={() => setShowDetails(d => !d)}
+              className="tl-card-hint"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left' }}
+            >
+              {showDetails ? '↑ Hide details' : '↓ Show details'}
+            </button>
           )}
 
-          {/* Request Details */}
-          <div style={{ fontSize: '0.875rem', color: '#6a6258', marginTop: '0.75rem' }}>
-            {request.estimated_duration && (
-              <p style={{ margin: '0.25rem 0' }}> Duration: About {request.estimated_duration} hour{request.estimated_duration > 1 ? 's' : ''}</p>
-            )}
-            {request.requires_heavy_lifting && (
-              <p style={{ margin: '0.25rem 0' }}> Heavy lifting required</p>
-            )}
-            {request.accessibility_requirements && (
-              <p style={{ margin: '0.25rem 0' }}>Accessibility: {request.accessibility_requirements}</p>
-            )}
-            {request.flexibility_level === 'strict' && (
-              <p style={{ margin: '0.25rem 0' }}>Specific time required</p>
-            )}
-          </div>
+          {showDetails && (
+            <div style={{ fontSize: '0.8rem', color: '#6a6258', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+              {request.estimated_duration && (
+                <p>Duration: About {request.estimated_duration} hour{request.estimated_duration > 1 ? 's' : ''}</p>
+              )}
+              {request.requires_heavy_lifting && (
+                <p>Heavy lifting required</p>
+              )}
+              {request.accessibility_requirements && (
+                <p>Accessibility: {request.accessibility_requirements}</p>
+              )}
+              {request.flexibility_level === 'strict' && (
+                <p>Specific time required</p>
+              )}
+              {request.address && (
+            <p className="request-location"> Location: {request.address}</p>
+          )}
+            </div>
+          )}
 
           {/* Show helper info if accepted */}
           {request.status === "in_progress" && acceptedHelper && (
