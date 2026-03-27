@@ -47,8 +47,13 @@ class RequestCreate(BaseModel):
     """Schema for users creating requests"""
     description: str
     address: Optional[str] = None
+    requester_phone: str
     latitude: Decimal
     longitude: Decimal
+    estimated_duration: Optional[int] = None
+    requires_heavy_lifting: bool = False
+    accessibility_requirements: Optional[str] = None
+    flexibility_level: str = "flexible"
 
 # Add schemas for contact info privacy
 class RequestPublicResponse(BaseModel):
@@ -206,6 +211,10 @@ class RequestResponse(BaseModel):
     accepted_by_volunteer_id: Optional[uuid.UUID] = None
     accepted_by_organization_id: Optional[uuid.UUID] = None
     accepted_at: Optional[datetime] = None
+    estimated_duration: Optional[int] = None
+    requires_heavy_lifting: bool = False
+    accessibility_requirements: Optional[str] = None
+    flexibility_level: str = "flexible"
     created_at: datetime
     updated_at: Optional[datetime] = None
 
