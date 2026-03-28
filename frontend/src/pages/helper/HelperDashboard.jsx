@@ -198,69 +198,100 @@ function MatchCard({ match, onAccept, onDecline, userType }) {
             </span>
             {"/"}
             {userType === 'volunteer' && match.distance_miles && (
-              <span className="tl-card-meta">
+              <>{" / "} <span className="tl-card-meta">
                 📍 {match.distance_miles} miles away
-              </span>
+              </span> </>
             )}
           </div>
           <span className="tl-card-meta">
             {new Date(request.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
           </span>
-        </div>
+          </div>
           
           <p className="tl-card-desc">{request.description}</p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', fontSize: '0.8rem', color: '#6a6258' }}></div>
           
           {request.address && (
-            <p className="request-location">📍 {request.address}</p>
+            <p>📍 {request.address}</p>
+          )}
+          {request.estimated_duration && (
+            <p>⏱ About {request.estimated_duration} hour{request.estimated_duration > 1 ? 's' : ''}</p>
+          )}
+          {request.requires_heavy_lifting && (
+            <p>🦾 Heavy lifting required</p>
+          )}
+          {request.accessibility_requirements && (
+            <p>♿ {request.accessibility_requirements}</p>
+          )}
+          {request.flexibility_level === 'strict' && (
+            <p>🕐 Specific time required</p>
           )}
 
-        {/* Contact Info (only show if accepted) */}
-        {match.status === 'accepted' && (
-          <div className="tl-helper-box">
-            <div className="tl-helper-avatar">
-              {request.requester_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+          {/* Contact Info (only show if accepted) */}
+          {match.status === 'accepted' && (
+            <>
+              <div className="tl-helper-box">
+                <div className="tl-helper-avatar">
+                  {request.requester_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                </div>
+                <div>
+                  <p className="tl-helper-name"> {request.requester_name}
+                  </p>
+                  <p className="tl-helper-contact"> {request.requester_email}
+                  {request.requester_phone ? ` · ${request.requester_phone}` : ''}
+                  </p>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Contact info locked message — before accepting */}
+          {match.status === 'notified' && (
+            <div style={{
+              fontSize: '0.75rem',
+              color: '#8a7a68',
+              background: '#f0ece4',
+              border: '1px solid #d8c8b0',
+              borderRadius: '8px',
+              padding: '0.5rem 0.75rem',
+              marginTop: '0.25rem'
+            }}>
+              🔐 Contact details will be shared once you accept
             </div>
-            <div>
-              <p className="tl-helper-name"> {request.requester_name}
-              </p>
-              <p className="tl-helper-contact"> {request.requester_email}
-              {request.requester_phone ? ` · ${request.requester_phone}` : ''}
-              </p>
+          )}
+
+          {/* Action Buttons */}
+          {match.status === 'notified' && (
+            <div className="tl-card-actions">
+              <button
+                onClick={() => onAccept(match.id)}
+                className="tl-action-btn tl-action-btn--green"
+              >
+                Accept
+              </button>
+              <button
+                onClick={() => onDecline(match.id)}
+                className="tl-action-btn tl-action-btn--red"
+              >
+                Decline
+              </button>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Action Buttons */}
-        {match.status === 'notified' && (
-          <div className="tl-card-actions">
-            <button
-              onClick={() => onAccept(match.id)}
-              className="tl-action-btn tl-action-btn--green"
-            >
-              Accept
-            </button>
-            <button
-              onClick={() => onDecline(match.id)}
-              className="tl-action-btn tl-action-btn--red"
-            >
-              Decline
-            </button>
-          </div>
-        )}
+          {match.status === 'accepted' && (
+            <p style={{ fontSize: '0.8rem', color: '#3a6020', fontWeight: 600, marginTop: '0.25rem' }}>
+              ✓ You accepted this request
+            </p>
+          )}
 
-        {match.status === 'accepted' && (
-          <p style={{ fontSize: '0.8rem', color: '#3a6020', fontWeight: 600, marginTop: '0.25rem' }}>
-            ✓ You accepted this request
-          </p>
-        )}
-
-        {match.status === 'declined' && (
-          <p style={{ fontSize: '0.8rem', color: '#8a7a68', marginTop: '0.25rem' }}>
-            {request.status === 'in_progress'
-            ? 'This request was accepted by another volunteer'
-            : 'You declined this request'}
-          </p>
-        )}
+          {match.status === 'declined' && (
+            <p style={{ fontSize: '0.8rem', color: '#8a7a68', marginTop: '0.25rem' }}>
+              {request.status === 'in_progress'
+              ? 'This request was accepted by another volunteer'
+              : 'You declined this request'}
+            </p>
+          )}
       </div>
     </div>
   );
