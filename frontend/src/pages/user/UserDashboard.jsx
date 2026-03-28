@@ -119,20 +119,20 @@ export default function UserDashboard() {
           <p className="dashboard-loading">Loading...</p>
         ) : filteredRequests.length === 0 ? (
           <div className="dashboard-empty">
+            <img 
+              src="/assets/empty-state.png" 
+              alt="No requests" 
+              style={{ width: '220px', height: 'auto', marginBottom: '0.5rem' }}
+            />
             <h3 className="dashboard-empty-title">
               {viewMode === 'active' ? 'No active requests' : 'No history yet'}
             </h3>
             <p className="dashboard-empty-body">
               {viewMode === 'active' 
-                ? 'Submit your first help request to get started'
+                ? 'Your community is ready to help. Submit a request and we\'ll find the right person for you.'
                 : 'Your completed and cancelled requests will appear here'
               }
             </p>
-            {viewMode === 'active' && (
-              <button onClick={() => setShowRequestForm(true)} className="btn-primary">
-                Submit Request
-              </button>
-            )}
           </div>
         ) : (
           <div className="tl-feed">
