@@ -115,6 +115,11 @@ export default function HelperDashboard() {
           <p className="dashboard-loading">Loading requests...</p>
         ) : matches.length === 0 ? (
           <div className="dashboard-empty">
+            <img 
+              src="/assets/empty-state.png" 
+              alt="No requests" 
+              style={{ width: '220px', height: 'auto', marginBottom: '0.5rem' }}
+            />
             <h3 className="dashboard-empty-title">
               {filter === 'notified' && 'No new requests'}
               {filter === 'accepted' && 'No accepted requests'}
@@ -146,6 +151,7 @@ export default function HelperDashboard() {
 
 function MatchCard({ match, onAccept, onDecline, userType }) {
   const request = match.request;
+  const [showDetails, setShowDetails] = useState(false)
 
   const dotColor =
     match.status === 'accepted' ? '#4a6a7a' :
@@ -210,22 +216,37 @@ function MatchCard({ match, onAccept, onDecline, userType }) {
           
           <p className="tl-card-desc">{request.description}</p>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', fontSize: '0.8rem', color: '#6a6258' }}></div>
-          
-          {request.address && (
-            <p>📍 {request.address}</p>
+          {/* Toggle details */}
+          {(request.estimated_duration || request.requires_heavy_lifting || request.accessibility_requirements || request.flexibility_level === 'strict') && (
+            <button
+              onClick={() => setShowDetails(d => !d)}
+              className="tl-card-hint"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left' }}
+            >
+              {showDetails ? '↑ Hide details' : '↓ Show details'}
+            </button>
           )}
-          {request.estimated_duration && (
-            <p>⏱ About {request.estimated_duration} hour{request.estimated_duration > 1 ? 's' : ''}</p>
-          )}
-          {request.requires_heavy_lifting && (
-            <p>🦾 Heavy lifting required</p>
-          )}
-          {request.accessibility_requirements && (
-            <p>♿ {request.accessibility_requirements}</p>
-          )}
-          {request.flexibility_level === 'strict' && (
-            <p>🕐 Specific time required</p>
+
+          {showDetails && (
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', fontSize: '0.8rem', color: '#6a6258' }}>
+            
+              {request.address && (
+                <p>Location: {request.address}</p>
+              )}
+              {request.estimated_duration && (
+                <p>Duration: About {request.estimated_duration} hour{request.estimated_duration > 1 ? 's' : ''}</p>
+              )}
+              {request.requires_heavy_lifting && (
+                <p>Heavy lifting required</p>
+              )}
+              {request.accessibility_requirements && (
+                <p>Accessibility: {request.accessibility_requirements}</p>
+              )}
+              {request.flexibility_level === 'strict' && (
+                <p>Specific time required</p>
+              )}
+            </div>
           )}
 
           {/* Contact Info (only show if accepted) */}
@@ -250,14 +271,14 @@ function MatchCard({ match, onAccept, onDecline, userType }) {
           {match.status === 'notified' && (
             <div style={{
               fontSize: '0.75rem',
-              color: '#8a7a68',
+              color: '#6a5540',
               background: '#f0ece4',
-              border: '1px solid #d8c8b0',
-              borderRadius: '8px',
+              border: '1px solid #b7b2ad',
+              borderRadius: '6px',
               padding: '0.5rem 0.75rem',
               marginTop: '0.25rem'
             }}>
-              🔐 Contact details will be shared once you accept
+              Contact details will be shared once you accept
             </div>
           )}
 

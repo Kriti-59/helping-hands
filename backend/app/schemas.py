@@ -316,6 +316,10 @@ class RequestInMatch(BaseModel):
     requester_phone: Optional[str]
     status: str
     created_at: datetime
+    estimated_duration: Optional[int] = None
+    requires_heavy_lifting: Optional[bool] = None
+    accessibility_requirements: Optional[str] = None
+    flexibility_level: Optional[str] = None
     
     class Config:
         from_attributes = True
