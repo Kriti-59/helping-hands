@@ -248,7 +248,7 @@ async def get_accepted_helper_info(
         raise HTTPException(status_code=404, detail="Request not found")
     
     # Check if request is in progress
-    if request.status != "in_progress":
+    if request.status not in ["in_progress", "completed"]:
         raise HTTPException(status_code=400, detail="Request has not been accepted yet")
     
     # Get the accepted match

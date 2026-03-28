@@ -52,7 +52,7 @@ async def create_request(
         user_id=user_uuid,
         requester_name=user.name,
         requester_email=user.email,
-        requester_phone=None,
+        requester_phone=request_data.requester_phone,
         description=request_data.description,
         latitude=request_data.latitude,
         longitude=request_data.longitude,
@@ -61,7 +61,11 @@ async def create_request(
         routing_type=classification["routing_type"],
         urgency=classification["urgency"],
         status="pending",
-        description_embedding=request_embedding
+        description_embedding=request_embedding,
+        estimated_duration=request_data.estimated_duration,
+        requires_heavy_lifting=request_data.requires_heavy_lifting,
+        accessibility_requirements=request_data.accessibility_requirements,
+        flexibility_level=request_data.flexibility_level
     )
     
     db.add(new_request)
@@ -201,10 +205,15 @@ async def update_request(
     
     request.description = request_data.description
     request.address = request_data.address
+    request.requester_phone = request_data.requester_phone
     request.category = classification["category"]
     request.routing_type = classification["routing_type"]
     request.urgency = classification["urgency"]
     request.description_embedding = request_embedding
+    request.estimated_duration = request_data.estimated_duration
+    request.requires_heavy_lifting = request_data.requires_heavy_lifting
+    request.accessibility_requirements = request_data.accessibility_requirements
+    request.flexibility_level = request_data.flexibility_level
     
     db.commit()
     

@@ -12,7 +12,7 @@ function ProtectedRoute({ children, allowedTypes }) {
   const { user } = useAuth();
 
   if (!user) {
-    return <Navigate to="/login" replace />
+    return <Navigate to="/" replace />
   }
 
   if (allowedTypes && !allowedTypes.includes(user.user_type)) {

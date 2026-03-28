@@ -119,23 +119,23 @@ export default function UserDashboard() {
           <p className="dashboard-loading">Loading...</p>
         ) : filteredRequests.length === 0 ? (
           <div className="dashboard-empty">
+            <img 
+              src="/assets/empty-state.png" 
+              alt="No requests" 
+              style={{ width: '220px', height: 'auto', marginBottom: '0.5rem' }}
+            />
             <h3 className="dashboard-empty-title">
               {viewMode === 'active' ? 'No active requests' : 'No history yet'}
             </h3>
             <p className="dashboard-empty-body">
               {viewMode === 'active' 
-                ? 'Submit your first help request to get started'
+                ? 'Your community is ready to help. Submit a request and we\'ll find the right person for you.'
                 : 'Your completed and cancelled requests will appear here'
               }
             </p>
-            {viewMode === 'active' && (
-              <button onClick={() => setShowRequestForm(true)} className="btn-primary">
-                Submit Request
-              </button>
-            )}
           </div>
         ) : (
-          <div className="db-cards-grid">
+          <div className="tl-feed">
             {filteredRequests.map((request, i) => (
               <RequestCard 
                 key={request.id} 
@@ -166,6 +166,7 @@ function RequestCard({ request, index, onUpdate, userId }) {
   const [showEditModal, setShowEditModal] = useState(false)
   const [showCancelModal, setShowCancelModal] = useState(false)
   const [actionLoading, setActionLoading] = useState(false)
+  const [showDetails, setShowDetails] = useState(false)
 
   const accentColors = ['#3a3228', '#4a6a7a', '#6a6258', '#8a7a68', '#3a5a6a']
   const accent = accentColors[index % accentColors.length]
@@ -290,13 +291,49 @@ const dotFilled =
 
           <p className="tl-card-desc">{request.description}</p>
 
-          {request.address && (
-            <p className="request-location">📌 {request.address}</p>
+
+          {/* Toggle details */}
+          {(request.estimated_duration || request.requires_heavy_lifting || request.accessibility_requirements || request.flexibility_level === 'strict') && (
+            <button
+              onClick={() => setShowDetails(d => !d)}
+              className="tl-card-hint"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left' }}
+            >
+              {showDetails ? '↑ Hide details' : '↓ Show details'}
+            </button>
+          )}
+
+          {showDetails && (
+            <div style={{ fontSize: '0.8rem', color: '#6a6258', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+              {request.estimated_duration && (
+                <p>Duration: About {request.estimated_duration} hour{request.estimated_duration > 1 ? 's' : ''}</p>
+              )}
+              {request.requires_heavy_lifting && (
+                <p>Heavy lifting required</p>
+              )}
+              {request.accessibility_requirements && (
+                <p>Accessibility: {request.accessibility_requirements}</p>
+              )}
+              {request.flexibility_level === 'strict' && (
+                <p>Specific time required</p>
+              )}
+              {request.address && (
+            <p className="request-location"> Location: {request.address}</p>
+          )}
+            </div>
           )}
 
           {/* Show helper info if accepted */}
           {request.status === "in_progress" && acceptedHelper && (
             <AcceptedHelperInfo
+              requestId={request.id}
+              helperType={acceptedHelper.type}
+            />
+          )}
+
+          {/* Show helper name after completing */}
+          {request.status === "completed" && acceptedHelper && (
+            <CompletedByInfo
               requestId={request.id}
               helperType={acceptedHelper.type}
             />
@@ -403,6 +440,32 @@ function AcceptedHelperInfo({ requestId, helperType }) {
   );
 }
 
+function CompletedByInfo({ requestId, helperType }) {
+  const [helperInfo, setHelperInfo] = useState(null)
+
+  useEffect(() => {
+    matchAPI.getAcceptedHelperInfo(requestId)
+      .then(res => setHelperInfo(res.data))
+      .catch(() => {})
+  }, [requestId])
+
+  if (!helperInfo) return null
+
+  return (
+    <div className="tl-helper-box">
+      <div className="tl-helper-avatar">
+        {helperInfo.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+      </div>
+      <div>
+        <p className="tl-helper-name">Completed by {helperInfo.name}</p>
+        <p className="tl-helper-contact">
+          {helperType === 'volunteer' ? 'Volunteer' : 'Organization'}
+        </p>
+      </div>
+    </div>
+  )
+}
+
 // Cancel Confirmation Modal
 function ConfirmCancelModal({ onConfirm, onCancel }) {
   return (
@@ -440,6 +503,11 @@ function EditRequestModal({ request, onClose, onSuccess, userId }) {
   const [formData, setFormData] = useState({
     description: request.description,
     address: request.address || '',
+    requester_phone: request.requester_phone || '',
+    estimated_duration: request.estimated_duration || '',
+    requires_heavy_lifting: request.requires_heavy_lifting || false,
+    accessibility_requirements: request.accessibility_requirements || '',
+    flexibility_level: request.flexibility_level || 'flexible',
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -450,6 +518,11 @@ function EditRequestModal({ request, onClose, onSuccess, userId }) {
  
     if (!formData.description.trim()) {
       setError('Please describe what you need help with')
+      return
+    }
+
+    if (!formData.requester_phone.trim()) {
+      setError('Please provide your phone number')
       return
     }
  
@@ -511,6 +584,19 @@ function EditRequestModal({ request, onClose, onSuccess, userId }) {
               />
             </div>
 
+            {/* Phone */}
+            <div>
+              <label className="input-label">Phone Number *</label>
+              <input
+                type="tel"
+                value={formData.requester_phone}
+                onChange={(e) => setFormData({ ...formData, requester_phone: e.target.value })}
+                className="input-field"
+                placeholder="required"
+                required
+              />
+            </div>
+
             {/* Location */}
             <div>
               <label className="input-label">Location</label>
@@ -521,6 +607,66 @@ function EditRequestModal({ request, onClose, onSuccess, userId }) {
                 className="input-field"
                 placeholder="123 Main St, Kansas City, MO"
               />
+            </div>
+            
+
+            {/* Estimated Duration */}
+            <div>
+              <label className="input-label">How long will this take?</label>
+              <select
+                value={formData.estimated_duration}
+                onChange={(e) => setFormData({ ...formData, estimated_duration: e.target.value ? parseInt(e.target.value) : '' })}
+                className="input-field"
+              >
+                <option value="">Select duration...</option>
+                <option value="1">About 1 hour</option>
+                <option value="2">2+ hours</option>
+                <option value="4">About 4 hours</option>
+                <option value="8">4+ hours</option>
+              </select>
+            </div>
+
+            {/* Heavy Lifting */}
+            <div>
+              <label className="input-label">
+                <input
+                  type="checkbox"
+                  checked={formData.requires_heavy_lifting}
+                  onChange={(e) => setFormData({ ...formData, requires_heavy_lifting: e.target.checked })}
+                  style={{ marginRight: '0.5rem' }}
+                />
+                This task requires heavy lifting
+              </label>
+            </div>
+
+            {/* Accessibility Requirements */}
+            <div>
+              <label className="input-label">Accessibility Requirements</label>
+              <textarea
+                value={formData.accessibility_requirements}
+                onChange={(e) => setFormData({ ...formData, accessibility_requirements: e.target.value })}
+                className="input-field"
+                rows="2"
+                placeholder="E.g., wheelchair accessible, ground floor only, quiet environment..."
+              />
+            </div>
+
+            {/* Flexibility */}
+            <div>
+              <label className="input-label">
+                <input
+                  type="checkbox"
+                  checked={formData.flexibility_level === 'flexible'}
+                  onChange={(e) => setFormData({ ...formData, flexibility_level: e.target.checked ? 'flexible' : 'strict' })}
+                  style={{ marginRight: '0.5rem' }}
+                />
+                I'm flexible with scheduling
+              </label>
+              <p className="input-hint">
+                {formData.flexibility_level === 'flexible' 
+                  ? "Yes - This gives us more options to find you help" 
+                  : "No - Please include the specific day and time you need help with in the description box above"}
+              </p>
             </div>
 
             <div className="modal-actions">
@@ -541,8 +687,13 @@ function RequestFormModal({ onClose, onSuccess, userId }) {
   const [formData, setFormData] = useState({
     description: '',
     address: '',
+    requester_phone: '',
     latitude: 39.0997,
     longitude: -94.5786,
+    estimated_duration: '',
+    requires_heavy_lifting: false,
+    accessibility_requirements: '',
+    flexibility_level: 'flexible',
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -553,6 +704,11 @@ function RequestFormModal({ onClose, onSuccess, userId }) {
  
     if (!formData.description.trim()) {
       setError('Please describe what you need help with')
+      return
+    }
+
+    if (!formData.requester_phone.trim()) {
+      setError('Please provide your phone number')
       return
     }
  
@@ -603,18 +759,88 @@ function RequestFormModal({ onClose, onSuccess, userId }) {
               </p>
             </div>
 
+            {/* Phone */}
+            <div>
+              <label className="input-label">Phone Number *</label>
+              <input
+                type="tel"
+                value={formData.requester_phone}
+                onChange={(e) => setFormData({ ...formData, requester_phone: e.target.value })}
+                className="input-field"
+                placeholder="required"
+                required
+              />
+            </div>
+
             {/* Location */}
             <div>
-              <label className="input-label">Location (Optional)</label>
+              <label className="input-label">Location</label>
               <input
                 type="text"
                 value={formData.address}
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                 className="input-field"
-                placeholder="123 Main St, Kansas City, MO"
+                placeholder="Please include location if you want us to find volunteers nearby"
               />
+            </div>
+
+
+            {/* Estimated Duration */}
+            <div>
+              <label className="input-label">How long will this take?</label>
+              <select
+                value={formData.estimated_duration}
+                onChange={(e) => setFormData({ ...formData, estimated_duration: e.target.value ? parseInt(e.target.value) : '' })}
+                className="input-field"
+              >
+                <option value="">Select duration...</option>
+                <option value="1">About 1 hour</option>
+                <option value="2">About 2 hours</option>
+                <option value="4">About 4 hours</option>
+                <option value="8"> 4+ hours</option>
+              </select>
+            </div>
+
+            {/* Heavy Lifting */}
+            <div>
+              <label className="input-label">
+                <input
+                  type="checkbox"
+                  checked={formData.requires_heavy_lifting}
+                  onChange={(e) => setFormData({ ...formData, requires_heavy_lifting: e.target.checked })}
+                  style={{ marginRight: '0.5rem' }}
+                />
+                This task requires heavy lifting
+              </label>
+            </div>
+
+            {/* Accessibility Requirements */}
+            <div>
+              <label className="input-label">Accessibility Requirements</label>
+              <textarea
+                value={formData.accessibility_requirements}
+                onChange={(e) => setFormData({ ...formData, accessibility_requirements: e.target.value })}
+                className="input-field"
+                rows="2"
+                placeholder="E.g., wheelchair accessible, ground floor only, quiet environment..."
+              />
+            </div>
+
+            {/* Flexibility */}
+            <div>
+              <label className="input-label">
+                <input
+                  type="checkbox"
+                  checked={formData.flexibility_level === 'flexible'}
+                  onChange={(e) => setFormData({ ...formData, flexibility_level: e.target.checked ? 'flexible' : 'strict' })}
+                  style={{ marginRight: '0.5rem' }}
+                />
+                I'm flexible with scheduling
+              </label>
               <p className="input-hint">
-                Helps us find volunteers nearby. We'll use Kansas City by default.
+                {formData.flexibility_level === 'flexible' 
+                  ? "Yes - This gives us more options to find you help" 
+                  : "No - Please include the specific day and time you need help with in the description box above"}
               </p>
             </div>
 
