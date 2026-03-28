@@ -331,6 +331,14 @@ const dotFilled =
             />
           )}
 
+          {/* Show helper name after completing */}
+          {request.status === "completed" && acceptedHelper && (
+            <CompletedByInfo
+              requestId={request.id}
+              helperType={acceptedHelper.type}
+            />
+          )}
+
         <div className="tl-card-actions">
           {canComplete && (
             <button onClick={handleMarkComplete} disabled={actionLoading} className="tl-action-btn tl-action-btn--green">
@@ -430,6 +438,32 @@ function AcceptedHelperInfo({ requestId, helperType }) {
       </div>
     </div>
   );
+}
+
+function CompletedByInfo({ requestId, helperType }) {
+  const [helperInfo, setHelperInfo] = useState(null)
+
+  useEffect(() => {
+    matchAPI.getAcceptedHelperInfo(requestId)
+      .then(res => setHelperInfo(res.data))
+      .catch(() => {})
+  }, [requestId])
+
+  if (!helperInfo) return null
+
+  return (
+    <div className="tl-helper-box">
+      <div className="tl-helper-avatar">
+        {helperInfo.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+      </div>
+      <div>
+        <p className="tl-helper-name">Completed by {helperInfo.name}</p>
+        <p className="tl-helper-contact">
+          {helperType === 'volunteer' ? 'Volunteer' : 'Organization'}
+        </p>
+      </div>
+    </div>
+  )
 }
 
 // Cancel Confirmation Modal
