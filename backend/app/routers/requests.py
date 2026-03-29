@@ -4,8 +4,8 @@ from typing import List, Optional
 import uuid
 
 from ..database import get_db
-from ..models import Request, User
-from ..schemas import RequestCreate, RequestResponse, RequestPublicResponse, RequestPrivateResponse
+from ..models import Request, User, Match
+from ..schemas import RequestCreate, RequestResponse, RequestPublicResponse, RequestPrivateResponse, StatusUpdate
 from ..services.ai_service import classify_request
 from ..services.embedding_service import generate_request_embedding
 from ..services.matching_service import find_matches_semantic
@@ -52,7 +52,7 @@ async def create_request(
         user_id=user_uuid,
         requester_name=user.name,
         requester_email=user.email,
-        requester_phone=None,
+        requester_phone=request_data.requester_phone,
         description=request_data.description,
         latitude=request_data.latitude,
         longitude=request_data.longitude,
@@ -61,7 +61,11 @@ async def create_request(
         routing_type=classification["routing_type"],
         urgency=classification["urgency"],
         status="pending",
-        description_embedding=request_embedding
+        description_embedding=request_embedding,
+        estimated_duration=request_data.estimated_duration,
+        requires_heavy_lifting=request_data.requires_heavy_lifting,
+        accessibility_requirements=request_data.accessibility_requirements,
+        flexibility_level=request_data.flexibility_level
     )
     
     db.add(new_request)
@@ -131,27 +135,97 @@ async def get_request(
     else:
         return RequestPublicResponse.from_orm(request)
 
-@router.patch("/{request_id}/status")
+@router.patch("/{request_id}/status", response_model=RequestResponse)
 async def update_request_status(
-    request_id: uuid.UUID,
-    new_status: str,
+    request_id: str,
+    status_update: StatusUpdate,
     db: Session = Depends(get_db)
 ):
-    """Update request status"""
-    valid_statuses = ['pending', 'matched', 'in_progress', 'completed', 'cancelled', 'no_matches']
+    """Update request status (complete/cancel)."""
+    try:
+        request_uuid = uuid.UUID(request_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid request ID")
     
-    if new_status not in valid_statuses:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid status. Must be one of: {valid_statuses}"
-        )
-    
-    request = db.query(Request).filter(Request.id == request_id).first()
+    request = db.query(Request).filter(Request.id == request_uuid).first()
     if not request:
         raise HTTPException(status_code=404, detail="Request not found")
     
-    request.status = new_status
+    if status_update.status not in ["completed", "cancelled"]:
+        raise HTTPException(status_code=400, detail="Invalid status")
+    
+    # Validate allowed transitions
+    cancellable = ["pending", "matched", "no_matches", "in_progress"]
+    completable = ["in_progress"]
+    
+    if status_update.status == "cancelled" and request.status not in cancellable:
+        raise HTTPException(status_code=400, detail=f"Cannot cancel a request with status '{request.status}'")
+    
+    if status_update.status == "completed" and request.status not in completable:
+        raise HTTPException(status_code=400, detail="Can only complete a request that is in progress")
+    
+    request.status = status_update.status
     db.commit()
     db.refresh(request)
     
-    return {"message": "Status updated", "request": request}
+    return RequestResponse.from_orm(request)
+
+@router.put("/{request_id}", response_model=RequestResponse)
+async def update_request(
+    request_id: str,
+    request_data: RequestCreate,
+    user_id: str,
+    db: Session = Depends(get_db)
+):
+    """Update an existing request and re-run matching."""
+    try:
+        request_uuid = uuid.UUID(request_id)
+        user_uuid = uuid.UUID(user_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid request ID or user ID format")
+    
+    request = db.query(Request).filter(Request.id == request_uuid).first()
+    if not request:
+        raise HTTPException(status_code=404, detail="Request not found")
+    
+    # Validate user ownership
+    if request.user_id != user_uuid:
+        raise HTTPException(status_code=403, detail="You do not have permission to edit this request")
+    
+    # Validate request status allows editing
+    editable_statuses = ["pending", "matched", "no_matches"]
+    if request.status not in editable_statuses:
+        raise HTTPException(status_code=400, detail=f"Cannot edit a request with status '{request.status}'. Requests can only be edited before a helper accepts.")
+    
+    classification = classify_request(request_data.description)
+    request_embedding = generate_request_embedding(
+        request_data.description,
+        classification["category"]
+    )
+    
+    request.description = request_data.description
+    request.address = request_data.address
+    request.requester_phone = request_data.requester_phone
+    request.category = classification["category"]
+    request.routing_type = classification["routing_type"]
+    request.urgency = classification["urgency"]
+    request.description_embedding = request_embedding
+    request.estimated_duration = request_data.estimated_duration
+    request.requires_heavy_lifting = request_data.requires_heavy_lifting
+    request.accessibility_requirements = request_data.accessibility_requirements
+    request.flexibility_level = request_data.flexibility_level
+    
+    db.commit()
+    
+    db.query(Match).filter(Match.request_id == request_uuid).delete()
+    
+    matches = find_matches_semantic(request, db)
+    for match in matches:
+        db.add(match)
+    
+    request.status = "matched" if matches else "no_matches"
+    
+    db.commit()
+    db.refresh(request)
+    
+    return RequestResponse.from_orm(request)

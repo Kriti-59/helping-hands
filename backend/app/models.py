@@ -86,7 +86,11 @@ class Request(Base):
     accepted_by_volunteer_id = Column(UUID(as_uuid=True), ForeignKey('volunteers.id'), nullable=True)
     accepted_by_organization_id = Column(UUID(as_uuid=True), ForeignKey('organizations.id'), nullable=True)
     accepted_at = Column(DateTime(timezone=True), nullable=True)
-    description_embedding = Column(Vector(3072)) 
+    description_embedding = Column(Vector(3072))
+    estimated_duration = Column(Integer, nullable=True)
+    requires_heavy_lifting = Column(Boolean, default=False)
+    accessibility_requirements = Column(Text, nullable=True)
+    flexibility_level = Column(String, default="flexible")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     

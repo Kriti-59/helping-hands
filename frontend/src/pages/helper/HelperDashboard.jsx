@@ -50,77 +50,89 @@ export default function HelperDashboard() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-slate-800">
-                {user.user_type === 'volunteer' ? '🙋 Volunteer' : '🏢 Organization'} Dashboard
-              </h1>
-              <p className="text-slate-600">Welcome back, {user.name}!</p>
-            </div>
-            <button onClick={logout} className="btn-ghost">
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
+  const handleLogout = () => { logout(); navigate('/') }
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        {/* Filter Tabs */}
-        <div className="bg-white rounded-lg shadow-sm p-2 mb-6 flex gap-2">
+  return (
+    <div className="db-layout">
+      {/* Sidebar */}
+      <aside className="db-sidebar">
+        <div className="db-sidebar-logo">
+          <div className="db-sidebar-logo-icon">HH</div>
+          <span className="db-sidebar-logo-text">Helping Hands</span>
+        </div>
+
+        <nav className="db-sidebar-nav">
           <button
+            className={`db-sidebar-link ${filter === 'notified' ? 'db-sidebar-link--active' : ''}`}
             onClick={() => setFilter('notified')}
-            className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
-              filter === 'notified'
-                ? 'bg-primary-500 text-white'
-                : 'text-slate-600 hover:bg-slate-100'
-            }`}
           >
+            <div className="db-sidebar-dot" style={{ background: '#c8b8a0' }} />
             New Requests
           </button>
           <button
+            className={`db-sidebar-link ${filter === 'accepted' ? 'db-sidebar-link--active' : ''}`}
             onClick={() => setFilter('accepted')}
-            className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
-              filter === 'accepted'
-                ? 'bg-primary-500 text-white'
-                : 'text-slate-600 hover:bg-slate-100'
-            }`}
           >
+            <div className="db-sidebar-dot" style={{ background: '#a0b880' }} />
             Accepted
           </button>
           <button
+            className={`db-sidebar-link ${filter === 'declined' ? 'db-sidebar-link--active' : ''}`}
             onClick={() => setFilter('declined')}
-            className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
-              filter === 'declined'
-                ? 'bg-primary-500 text-white'
-                : 'text-slate-600 hover:bg-slate-100'
-            }`}
           >
+            <div className="db-sidebar-dot" style={{ background: '#7a9aaa' }} />
             Declined
           </button>
+        </nav>
+
+        <div className="db-sidebar-bottom">
+          <div className="db-sidebar-user">
+            <div className="db-sidebar-avatar">{user.name?.[0]?.toUpperCase()}</div>
+            <span className="db-sidebar-username">{user.name}</span>
+          </div>
+          <button className="db-sidebar-link" onClick={handleLogout}>
+            <div className="db-sidebar-dot" style={{ background: '#a87868' }} />
+            Sign Out
+          </button>
+        </div>
+      </aside>
+
+      {/* Main */}
+      <main className="db-main">
+
+        {/* Header */}
+        <div className="db-header">
+          <div>
+            <h1 className="db-heading">
+              Welcome back, {user.name?.split(' ')[0]}!
+            </h1>
+            <p className="db-subheading">{user.user_type === 'volunteer' ? 'Volunteer' : 'Organization'} Dashboard</p>
+          </div>
         </div>
 
         {/* Matches List */}
         {loading ? (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-primary-500 border-t-transparent"></div>
-            <p className="mt-4 text-slate-600">Loading requests...</p>
-          </div>
+          <p className="dashboard-loading">Loading requests...</p>
         ) : matches.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-            <p className="text-slate-500 text-lg">
+          <div className="dashboard-empty">
+            <img 
+              src="/assets/empty-state.png" 
+              alt="No requests" 
+              style={{ width: '220px', height: 'auto', marginBottom: '0.5rem' }}
+            />
+            <h3 className="dashboard-empty-title">
+              {filter === 'notified' && 'No new requests'}
+              {filter === 'accepted' && 'No accepted requests'}
+              {filter === 'declined' && 'No declined requests'}
+            </h3>
+            <p className="dashboard-empty-body">
               {filter === 'notified' && 'No new requests at the moment.'}
               {filter === 'accepted' && 'You haven\'t accepted any requests yet.'}
               {filter === 'declined' && 'You haven\'t declined any requests yet.'}
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="tl-feed">
             {matches.map((match) => (
               <MatchCard
                 key={match.id}
@@ -132,13 +144,20 @@ export default function HelperDashboard() {
             ))}
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }
 
 function MatchCard({ match, onAccept, onDecline, userType }) {
   const request = match.request;
+  const [showDetails, setShowDetails] = useState(false)
+
+  const dotColor =
+    match.status === 'accepted' ? '#4a6a7a' :
+    match.status === 'declined' ? '#d8c8b0' : '#8a7a68'
+
+  const dotFilled = match.status === 'accepted'
 
   const getUrgencyBadge = (urgency) => {
     const badges = {
@@ -156,82 +175,145 @@ function MatchCard({ match, onAccept, onDecline, userType }) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow">
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
-            <span className={getUrgencyBadge(request.urgency)}>
-              {request.urgency} urgency
-            </span>
-            <span className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
-              {formatCategory(request.category)}
-            </span>
-            {userType === 'volunteer' && match.distance_miles && (
-              <span className="text-xs text-slate-500 bg-blue-100 px-2 py-0.5 rounded-full">
-                📍 {match.distance_miles} miles away
-              </span>
-            )}
-          </div>
-          
-          <p className="text-slate-700 text-lg mb-2">{request.description}</p>
-          
-          {request.address && (
-            <p className="text-sm text-slate-500">📍 {request.address}</p>
-          )}
-          
-          <p className="text-xs text-slate-400 mt-2">
-            Requested {new Date(request.created_at).toLocaleDateString()}
-          </p>
+    <div className="tl-row">
+      <div className="tl-rail">
+        <div className="tl-dot" style={{ borderColor: dotColor }}>
+          <div style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background: dotFilled ? dotColor : 'transparent'
+          }} />
         </div>
       </div>
+      
+      <div className="tl-card">
+        <div className="tl-card-top">
+          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={{
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              color: request.urgency === 'high' ? '#b86050' :
+                    request.urgency === 'medium' ? '#8a6a30' : '#4a6a7a'
+            }}>
+              {request.urgency} urgency
+            </span>
+            {"/"}
+            <span className="tl-card-meta">
+              {formatCategory(request.category)}
+            </span>
+            {"/"}
+            {userType === 'volunteer' && match.distance_miles && (
+              <>{" / "} <span className="tl-card-meta">
+                📍 {match.distance_miles} miles away
+              </span> </>
+            )}
+          </div>
+          <span className="tl-card-meta">
+            {new Date(request.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+          </span>
+          </div>
+          
+          <p className="tl-card-desc">{request.description}</p>
 
-      {/* Contact Info (only show if accepted) */}
-      {match.status === 'accepted' && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-          <h4 className="font-semibold text-green-800 mb-2">Contact Information:</h4>
-          <p className="text-sm text-green-700">
-            <strong>Name:</strong> {request.requester_name}
-          </p>
-          <p className="text-sm text-green-700">
-            <strong>Email:</strong> {request.requester_email}
-          </p>
-          {request.requester_phone && (
-            <p className="text-sm text-green-700">
-              <strong>Phone:</strong> {request.requester_phone}
+          {/* Toggle details */}
+          {(request.estimated_duration || request.requires_heavy_lifting || request.accessibility_requirements || request.flexibility_level === 'strict') && (
+            <button
+              onClick={() => setShowDetails(d => !d)}
+              className="tl-card-hint"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left' }}
+            >
+              {showDetails ? '↑ Hide details' : '↓ Show details'}
+            </button>
+          )}
+
+          {showDetails && (
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', fontSize: '0.8rem', color: '#6a6258' }}>
+            
+              {request.address && (
+                <p>Location: {request.address}</p>
+              )}
+              {request.estimated_duration && (
+                <p>Duration: About {request.estimated_duration} hour{request.estimated_duration > 1 ? 's' : ''}</p>
+              )}
+              {request.requires_heavy_lifting && (
+                <p>Heavy lifting required</p>
+              )}
+              {request.accessibility_requirements && (
+                <p>Accessibility: {request.accessibility_requirements}</p>
+              )}
+              {request.flexibility_level === 'strict' && (
+                <p>Specific time required</p>
+              )}
+            </div>
+          )}
+
+          {/* Contact Info (only show if accepted) */}
+          {match.status === 'accepted' && (
+            <>
+              <div className="tl-helper-box">
+                <div className="tl-helper-avatar">
+                  {request.requester_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                </div>
+                <div>
+                  <p className="tl-helper-name"> {request.requester_name}
+                  </p>
+                  <p className="tl-helper-contact"> {request.requester_email}
+                  {request.requester_phone ? ` · ${request.requester_phone}` : ''}
+                  </p>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Contact info locked message — before accepting */}
+          {match.status === 'notified' && (
+            <div style={{
+              fontSize: '0.75rem',
+              color: '#6a5540',
+              background: '#f0ece4',
+              border: '1px solid #b7b2ad',
+              borderRadius: '6px',
+              padding: '0.5rem 0.75rem',
+              marginTop: '0.25rem'
+            }}>
+              Contact details will be shared once you accept
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          {match.status === 'notified' && (
+            <div className="tl-card-actions">
+              <button
+                onClick={() => onAccept(match.id)}
+                className="tl-action-btn tl-action-btn--green"
+              >
+                Accept
+              </button>
+              <button
+                onClick={() => onDecline(match.id)}
+                className="tl-action-btn tl-action-btn--red"
+              >
+                Decline
+              </button>
+            </div>
+          )}
+
+          {match.status === 'accepted' && (
+            <p style={{ fontSize: '0.8rem', color: '#3a6020', fontWeight: 600, marginTop: '0.25rem' }}>
+              ✓ You accepted this request
             </p>
           )}
-        </div>
-      )}
 
-      {/* Action Buttons */}
-      {match.status === 'notified' && (
-        <div className="flex gap-3">
-          <button
-            onClick={() => onAccept(match.id)}
-            className="btn-primary flex-1"
-          >
-            ✓ Accept Request
-          </button>
-          <button
-            onClick={() => onDecline(match.id)}
-            className="btn-outline flex-1"
-          >
-            ✗ Decline
-          </button>
-        </div>
-      )}
-
-      {match.status === 'accepted' && (
-        <div className="bg-green-100 text-green-800 px-4 py-2 rounded-lg text-center font-medium">
-          ✓ You accepted this request
-        </div>
-      )}
-
-      {match.status === 'declined' && (
-        <div className="bg-slate-100 text-slate-600 px-4 py-2 rounded-lg text-center">
-          You declined this request
-        </div>
-      )}
+          {match.status === 'declined' && (
+            <p style={{ fontSize: '0.8rem', color: '#8a7a68', marginTop: '0.25rem' }}>
+              {request.status === 'in_progress'
+              ? 'This request was accepted by another volunteer'
+              : 'You declined this request'}
+            </p>
+          )}
+      </div>
     </div>
   );
-}
+  }

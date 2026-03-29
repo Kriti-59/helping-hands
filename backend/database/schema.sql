@@ -4,6 +4,7 @@
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS vector;
 
 -- ============================================
 -- USERS Table
@@ -15,9 +16,9 @@ CREATE TABLE users (
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     is_active BOOLEAN DEFAULT true,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    last_login TIMESTAMP
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMP WITH TIME ZONE
 );
 
 CREATE INDEX idx_users_email ON users(email);
@@ -30,17 +31,23 @@ CREATE TABLE volunteers (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
-    phone VARCHAR(50),
+    password_hash VARCHAR(255),
+    phone VARCHAR(50) NOT NULL,
     bio TEXT,
-    categories TEXT[] NOT NULL,
-    latitude DECIMAL(10, 8) NOT NULL,
-    longitude DECIMAL(11, 8) NOT NULL,
+    categories TEXT[],
+    skills_experience TEXT,
+    has_vehicle BOOLEAN DEFAULT false,
+    can_lift_heavy BOOLEAN DEFAULT false,
+    languages TEXT[],
+    latitude DECIMAL(10, 7),
+    longitude DECIMAL(10, 7),
     address TEXT,
-    radius_miles INTEGER NOT NULL,
+    radius_miles INTEGER,
     availability_notes TEXT,
     is_active BOOLEAN DEFAULT true,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    bio_embedding vector(3072),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_volunteers_email ON volunteers(email);
@@ -54,18 +61,20 @@ CREATE TABLE organizations (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255),
     phone VARCHAR(50),
     bio TEXT,
-    categories TEXT[] NOT NULL,
-    latitude DECIMAL(10, 8),
-    longitude DECIMAL(11, 8),
+    categories TEXT[],
+    latitude DECIMAL(10, 7),
+    longitude DECIMAL(10, 7),
     address TEXT,
     service_area VARCHAR(255),
     organization_hours TEXT,
     website_url VARCHAR(500),
     is_active BOOLEAN DEFAULT true,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    bio_embedding vector(3072),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_organizations_email ON organizations(email);
@@ -82,8 +91,8 @@ CREATE TABLE requests (
     requester_email VARCHAR(255) NOT NULL,
     requester_phone VARCHAR(50),
     description TEXT NOT NULL,
-    latitude DECIMAL(10, 8) NOT NULL,
-    longitude DECIMAL(11, 8) NOT NULL,
+    latitude DECIMAL(10, 7) NOT NULL,
+    longitude DECIMAL(10, 7) NOT NULL,
     address TEXT,
     category VARCHAR(50) NOT NULL,
     routing_type VARCHAR(20) NOT NULL CHECK (routing_type IN ('local', 'broad')),
@@ -93,9 +102,10 @@ CREATE TABLE requests (
     )),
     accepted_by_volunteer_id UUID REFERENCES volunteers(id) ON DELETE SET NULL,
     accepted_by_organization_id UUID REFERENCES organizations(id) ON DELETE SET NULL,
-    accepted_at TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    accepted_at TIMESTAMP WITH TIME ZONE,
+    description_embedding vector(3072),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_requests_user ON requests(user_id);
@@ -114,8 +124,8 @@ CREATE TABLE matches (
     organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE,
     status VARCHAR(50) DEFAULT 'notified' CHECK (status IN ('notified', 'accepted', 'declined')),
     distance_miles DECIMAL(10, 2),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     CHECK (
         (helper_type = 'volunteer' AND volunteer_id IS NOT NULL AND organization_id IS NULL) OR
         (helper_type = 'organization' AND organization_id IS NOT NULL AND volunteer_id IS NULL)
@@ -140,23 +150,23 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER update_users_updated_at 
+CREATE TRIGGER update_users_updated_at
     BEFORE UPDATE ON users
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_volunteers_updated_at 
+CREATE TRIGGER update_volunteers_updated_at
     BEFORE UPDATE ON volunteers
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_organizations_updated_at 
+CREATE TRIGGER update_organizations_updated_at
     BEFORE UPDATE ON organizations
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_requests_updated_at 
+CREATE TRIGGER update_requests_updated_at
     BEFORE UPDATE ON requests
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_matches_updated_at 
+CREATE TRIGGER update_matches_updated_at
     BEFORE UPDATE ON matches
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
@@ -178,13 +188,13 @@ DECLARE
 BEGIN
     dlat := RADIANS(lat2 - lat1);
     dlon := RADIANS(lon2 - lon1);
-    
+
     a := SIN(dlat/2) * SIN(dlat/2) +
          COS(RADIANS(lat1)) * COS(RADIANS(lat2)) *
          SIN(dlon/2) * SIN(dlon/2);
-    
+
     c := 2 * ATAN2(SQRT(a), SQRT(1-a));
-    
+
     RETURN r * c;
 END;
-$$ LANGUAGE plpgsql IMMUTABLE;cd b  
+$$ LANGUAGE plpgsql IMMUTABLE;
