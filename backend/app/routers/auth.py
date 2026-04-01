@@ -1,9 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from ..database import get_db
 from ..models import User, Volunteer, Organization
-from ..schemas import UserLogin
-from ..utils.auth import verify_password
+from ..schemas import UserLogin, VolunteerCreate
+from ..utils.auth import verify_password, hash_password
+from ..services.embedding_service import generate_volunteer_embedding
+
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -62,3 +65,47 @@ async def login(credentials: UserLogin, db: Session = Depends(get_db)):
         status_code=401,
         detail="Invalid email or password"
     )
+
+
+@router.post("/register/volunteer")
+async def register_volunteer(data: VolunteerCreate, db: Session = Depends(get_db)):
+    if db.query(User).filter(User.email == data.email).first():
+        raise HTTPException(status_code=400, detail="Email already registered")
+    if db.query(Volunteer).filter(Volunteer.email == data.email).first():
+        raise HTTPException(status_code=400, detail="Email already registered")
+    if db.query(Organization).filter(Organization.email == data.email).first():
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    volunteer = Volunteer(
+        name=data.name,
+        email=data.email,
+        password_hash=hash_password(data.password),
+        phone=data.phone,
+        bio=data.bio,
+        address=data.address,
+        latitude=data.latitude,
+        longitude=data.longitude,
+        radius_miles=data.radius_miles,
+        categories=data.categories,
+        skills_experience=data.skills_experience,
+        has_vehicle=data.has_vehicle,
+        can_lift_heavy=data.can_lift_heavy,
+        languages=data.languages,
+        is_active=True,
+    )
+
+    db.add(volunteer)
+    db.commit()
+    db.refresh(volunteer)
+
+    try:
+        embedding = generate_volunteer_embedding(volunteer)
+        embedding_str = '[' + ','.join(map(str, embedding)) + ']'
+        db.execute(
+            text("UPDATE volunteers SET bio_embedding = :embedding WHERE id = :id"),
+            {"embedding": embedding_str, "id": volunteer.id}
+        )
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print(f"⚠️ Embedding generation failed for {volunteer.email}: {e}")

@@ -6,6 +6,8 @@ import UserLogin from './pages/auth/UserLogin';
 import UserRegister from './pages/auth/UserRegister';
 import UserDashboard from './pages/user/UserDashboard';
 import HelperDashboard from './pages/helper/HelperDashboard';
+import VolunteerRegister from './pages/auth/VolunteerRegister'
+
 
 // Protected Route Component
 function ProtectedRoute({ children, allowedTypes }) {
@@ -40,6 +42,7 @@ function AppRoutes() {
         } /> : <UserLogin />} 
       />
       <Route path="/register" element={<UserRegister />} />
+      <Route path="/volunteer/register" element={<VolunteerRegister />} />
 
       {/* User Routes */}
       <Route
